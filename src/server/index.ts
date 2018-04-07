@@ -20,6 +20,8 @@ import { login as loginElastic, initMappings } from '../shared/elastic/api';
 import { ingestBlocks, recalculateAccounts } from './ingestApi';
 import { getTransaction } from '../shared/transactionsApi';
 import { Token, utils } from 'ont-sdk-ts';
+import * as AWS from 'aws-sdk';
+
 require('dotenv').load();
 
 const { StringReader } = utils;
@@ -27,8 +29,11 @@ const { Transfers, Contract } = Token;
 
 function login() {
   const useAws = process.env.REACT_APP_API_AWS !== undefined ? 
-    Boolean(process.env.REACT_APP_API_AWS) : 
-    false;
+    JSON.parse(process.env.REACT_APP_API_AWS) : false;
+
+  if (useAws) {
+    AWS.config.region = process.env.REACT_APP_API_AWS_REGION || 'eu-central-1';
+  }
 
   loginElastic(process.env.REACT_APP_API_URL || 'http://localhost:9200', useAws);
 }
