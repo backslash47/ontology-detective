@@ -39,7 +39,7 @@ export default compose<Props, PropsOuter>(
             order: Direction
         ) => getTransactionTransfers(props.transactionHash, from, size, sortColumn, order),
         sort: 'Timestamp',
-        order: 'ascending',
+        order: 'descending',
     })),
     innerGrid<Transfer, SortColumn>('transfers'),
     branch<Props>(

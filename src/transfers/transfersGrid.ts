@@ -30,7 +30,7 @@ export default compose<Props, RouteComponentProps<{}>>(
     defaultProps({
         dataLoader: getTransfers,
         sort: 'Timestamp',
-        order: 'ascending'
+        order: 'descending'
     }),
     remoteGrid<Transfer, SortColumn>()
 ) (View);

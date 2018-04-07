@@ -39,7 +39,7 @@ export default compose<Props, PropsOuter>(
             order: Direction
         ) => getBlockTransactions(props.blockHash, from, size, sortColumn, order),
         sort: 'Timestamp',
-        order: 'ascending',
+        order: 'descending',
     })),
     innerGrid<Transaction, SortColumn>('transactions'),
     branch<Props>(

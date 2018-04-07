@@ -29,8 +29,8 @@ export type Props = PropsInner<Account, SortColumn>;
 export default compose<Props, RouteComponentProps<{}>>(
     defaultProps({
         dataLoader: getAccounts,
-        sort: 'address',
-        order: 'ascending'
+        sort: 'lastTime',
+        order: 'descending'
     }),
     remoteGrid<Account, SortColumn>()
 ) (View);

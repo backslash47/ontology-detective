@@ -39,7 +39,7 @@ export default compose<Props, PropsOuter>(
             order: Direction,
         ) => getAccountTransfers(props.address, from, size, sortColumn, order),
         sort: 'Timestamp',
-        order: 'ascending',
+        order: 'descending',
         highlightAddress: props.address
     })),
     innerGrid<Transfer, SortColumn>('transfers'),
