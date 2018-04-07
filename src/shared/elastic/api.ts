@@ -17,19 +17,23 @@
  */
 
 import * as elasticsearch from 'elasticsearch';
+import * as HttpAmazonESConnector from 'http-aws-es';
 
 import { txMapping, Indices, blockMapping, accountMapping, TransferMapping } from './model';
 
 let hostSaved: string;
+let useAwsSaved: boolean = false;
 
-export function login(host: string): void {
+export function login(host: string, useAws?: boolean): void {
     hostSaved = host;
+    useAwsSaved = useAws ? true : false;
 }
 
 export function getClient(): elasticsearch.Client {
     return new elasticsearch.Client({
         host: `${hostSaved}`,
-        log: 'warning'
+        log: 'warning',
+        connectionClass: useAwsSaved ? HttpAmazonESConnector : undefined
     });
 }
 

@@ -20,24 +20,33 @@ import { login as loginElastic, initMappings } from '../shared/elastic/api';
 import { ingestBlocks, recalculateAccounts } from './ingestApi';
 import { getTransaction } from '../shared/transactionsApi';
 import { Token, utils } from 'ont-sdk-ts';
+require('dotenv').load();
 
 const { StringReader } = utils;
 const { Transfers, Contract } = Token; 
 
+function login() {
+  const useAws = process.env.REACT_APP_API_AWS !== undefined ? 
+    Boolean(process.env.REACT_APP_API_AWS) : 
+    false;
+
+  loginElastic(process.env.REACT_APP_API_URL || 'http://localhost:9200', useAws);
+}
+
 export async function mappings() {
-  loginElastic('http://api.ontdetective.org');
-  
+  login();
+
   await initMappings();
 }
 
 export async function ingest() {
-  loginElastic('http://api.ontdetective.org');
+  login();
   
   await ingestBlocks();
 }
 
 export async function recalculate() {
-  loginElastic('http://api.ontdetective.org');
+  login();
 
   await recalculateAccounts();
 }

@@ -5,9 +5,12 @@
   "license": "LGPL",
   "private": true,
   "dependencies": {
+    "aws-sdk": "^2.222.1",
     "date-fns": "^1.29.0",
+    "dotenv": "^5.0.1",
     "elasticsearch": "^14.2.1",
     "html5-websocket": "^2.0.2",
+    "http-aws-es": "^4.0.0",
     "lodash": "^4.17.5",
     "make-runnable": "^1.3.6",
     "numeral": "^2.0.6",
@@ -34,6 +37,7 @@
     "recalculate": "node build/server/server recalculate"
   },
   "devDependencies": {
+    "@types/http-aws-es": "^1.1.3",
     "@types/elasticsearch": "^5.0.22",
     "@types/jest": "^22.2.0",
     "@types/lodash": "^4.14.105",
