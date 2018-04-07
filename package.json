@@ -27,6 +27,7 @@
     "build": "REACT_APP_API_URL='http://api.ontdetective.org' react-scripts-ts build",
     "test": "react-scripts-ts test --env=jsdom",
     "eject": "react-scripts-ts eject",
+    "buildOntSdk": "cd node_modules/ont-sdk-ts && yarn build:prod",
     "buildServer": "tsc -p src/server",
     "mappings": "node build/server/server mappings",
     "ingest": "node build/server/server ingest",
