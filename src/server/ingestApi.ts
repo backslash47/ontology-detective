@@ -246,4 +246,8 @@ export async function ingestBlocks(): Promise<void> {
             console.log('Received error:', response);
         }
     };
+
+    ws.onerror = function(event) {
+        console.log(event);
+    }
 }
