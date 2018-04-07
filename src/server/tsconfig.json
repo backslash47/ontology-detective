@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "outDir": "../../build/server",
+    "module": "commonjs",
+    "target": "es6",
+    "moduleResolution": "node",
+    "noImplicitAny": false
+  },
+  "include": [
+    "index.ts",
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

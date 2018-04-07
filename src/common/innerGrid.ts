@@ -1,0 +1,112 @@
+/*
+ * Copyright (C) 2018 Matus Zamborsky
+ * This file is part of The ONT Detective.
+ *
+ * The ONT Detective is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The ONT Detective is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with The ONT Detective.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+import { compose, lifecycle, withProps, withState, withHandlers, flattenProp, ComponentEnhancer } from 'recompose';
+import { get } from 'lodash';
+import { PropsInner, PropsOuter, PropsOwn, QueryParams, State, Handlers, Direction } from './gridTypes';
+import { StateSetter, changeStateParam } from '~/utils';
+
+function innerGrid<T, SC>(prefix: string): ComponentEnhancer<PropsInner<T, SC>, PropsOuter<T, SC>> {
+    return compose(
+        withProps<PropsOwn<SC>, PropsOuter<T, SC>>(props => { 
+            const queryParams = {
+                ...{ sort: props.sort, order: props.order, page: 0 }, 
+                ...get(props.location.state, prefix, {}) as QueryParams<SC>
+            };
+
+            return {
+                pageSize: 10,
+                ...queryParams
+            };
+        }),
+        withState<PropsOuter<T, SC>, State<T>, 'state', 'setState'>('state', 'setState', ({ location }) => ({
+            items: [],
+            count: 0,
+            prevLink: location,
+            nextLink: location,
+            firstIndex: 0,
+            lastIndex: 0,
+            hasPrev: false,
+            hasNext: false
+        })),
+        withHandlers<PropsOuter<T, SC> & PropsOwn<SC> & StateSetter<State<T>>, Handlers<SC>>({
+            load: ({ 
+                pageSize, 
+                setState, 
+                location, 
+                dataLoader 
+            }) => async (page: number, sort: SC, order: Direction) => {
+                
+                const { count, items } = await dataLoader(page * pageSize, pageSize, sort, order);
+
+                const firstIndex = Math.max(page * pageSize + 1, 0);
+                const lastIndex = Math.min((page + 1) * pageSize, count);
+
+                const prevLink = firstIndex > 1 ? 
+                    changeStateParam(location, `${prefix}.page`, String(page - 1)) : 
+                    location;
+
+                const nextLink = lastIndex < count ? 
+                    changeStateParam(location, `${prefix}.page`, String(page + 1)) : 
+                    location;
+
+                setState({
+                    items,
+                    count,
+                    firstIndex,
+                    lastIndex,
+                    prevLink,
+                    nextLink,
+                    hasPrev: firstIndex > 1,
+                    hasNext: lastIndex < count
+                });
+
+                return;
+            },
+            getColumnSortLink: ({location, order, sort}) => (column: SC) => {
+                if (sort === column) {
+                    return changeStateParam(
+                        location, 
+                        `${prefix}.order`, 
+                        order === 'ascending' ? 'descending' : 'ascending'
+                    );
+                } else {
+                    const resetOrder = changeStateParam(location, `${prefix}.order`, 'ascending');
+                    return changeStateParam(resetOrder, `${prefix}.sort`, column.toString());
+                }
+            }
+        }),
+        flattenProp('state'),
+        lifecycle<PropsOwn<SC> & State<T> & Handlers<SC>, null>({
+            async componentDidMount() {
+                await this.props.load(Number(this.props.page), this.props.sort, this.props.order);
+            },
+
+            async componentWillReceiveProps(nextProps: PropsOwn<SC>) {
+                if (this.props.page !== nextProps.page ||
+                    this.props.sort !== nextProps.sort ||
+                    this.props.order !== nextProps.order) {
+                    
+                    await this.props.load(Number(nextProps.page), nextProps.sort, nextProps.order);
+                }
+            }
+        }),
+    );
+}
+
+export default innerGrid;

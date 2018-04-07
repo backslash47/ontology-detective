@@ -1,0 +1,49 @@
+{
+  "name": "ontdetective",
+  "author": "Matus Zamborsky",
+  "version": "0.1.0",
+  "license": "LGPL",
+  "private": true,
+  "dependencies": {
+    "date-fns": "^1.29.0",
+    "elasticsearch": "^14.2.1",
+    "html5-websocket": "^2.0.2",
+    "lodash": "^4.17.5",
+    "make-runnable": "^1.3.6",
+    "numeral": "^2.0.6",
+    "ont-sdk-ts": "backslash47/ontology-ts-sdk#exported",
+    "query-string": "^6.0.0",
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0",
+    "react-router-dom": "^4.2.2",
+    "react-scripts-ts": "2.14.0",
+    "recompose": "^0.26.0",
+    "semantic-ui-css": "^2.3.1",
+    "semantic-ui-react": "^0.79.0",
+    "util": "^0.10.3"
+  },
+  "scripts": {
+    "start": "react-scripts-ts start",
+    "build": "REACT_APP_API_URL='http://api.ontdetective.org' react-scripts-ts build",
+    "test": "react-scripts-ts test --env=jsdom",
+    "eject": "react-scripts-ts eject",
+    "buildServer": "tsc -p src/server",
+    "mappings": "node build/server/server mappings",
+    "ingest": "node build/server/server ingest",
+    "recalculate": "node build/server/server recalculate"
+  },
+  "devDependencies": {
+    "@types/elasticsearch": "^5.0.22",
+    "@types/jest": "^22.2.0",
+    "@types/lodash": "^4.14.105",
+    "@types/node": "^9.4.7",
+    "@types/numeral": "^0.0.22",
+    "@types/query-string": "^5.1.0",
+    "@types/react": "^16.0.40",
+    "@types/react-dom": "^16.0.4",
+    "@types/react-router-dom": "^4.2.5",
+    "@types/recompose": "^0.24.6",
+    "@types/ws": "^4.0.2",
+    "typescript": "^2.7.2"
+  }
+}
