@@ -53,3 +53,7 @@ export function arrayEqual<T>(arr1: T[], arr2: T[]) {
     }
     return true;
 }
+
+export function sleep(ms = 0) {
+    return new Promise(r => setTimeout(r, ms));
+}

@@ -28,6 +28,7 @@ import { indexBlock, getLastBlock } from '../shared/blocksApi';
 
 import { Token, utils, core, CONST } from 'ont-sdk-ts';
 import { Assets } from '../const';
+import { sleep } from '../utils';
 
 const { StringReader } = utils;
 const { Transfers, Contract } = Token;
@@ -205,6 +206,19 @@ function constructRequest(index: number): string {
     return JSON.stringify(request);
 }
 
+// function constructHeartBeat(): string {
+//     const request = {
+//         Action: 'heartbeat',
+//         Version: '1.0.0',
+//         SubscribeJsonBlock: true,
+//         SubscribeRawBlock: true,
+//         SubscribeEvent: true,
+//         SubscribeBlockTxHashs: true
+//     };
+
+//     return JSON.stringify(request);
+// }
+
 interface WsResponse {
     Action: string;
     Desc: string;
@@ -222,6 +236,7 @@ export async function ingestBlocks(): Promise<void> {
 
     ws.onopen = function open() {
         console.log('Websocket connected. Starting from ', last + 1);
+        // ws.send(constructHeartBeat());
         ws.send(constructRequest(last + 1));
     };
 
@@ -242,6 +257,11 @@ export async function ingestBlocks(): Promise<void> {
             last = working;
             ws.send(constructRequest(working + 1));
             
+        } else if (response.Desc === 'UNKNOWN BLOCK') {
+            console.log('No new block, waiting 3 seconds.');
+            await sleep(3000);
+            ws.send(constructRequest(last + 1));
+
         } else {
             console.log('Received error:', response);
         }
