@@ -5239,7 +5239,7 @@ onetime@^2.0.0:
 
 ont-sdk-ts@backslash47/ontology-ts-sdk#exported:
   version "1.0.0"
-  resolved "https://codeload.github.com/backslash47/ontology-ts-sdk/tar.gz/2d3846d0b15b86b2994b893cf7f2897889fcb40c"
+  resolved "https://codeload.github.com/backslash47/ontology-ts-sdk/tar.gz/60234c51b74b88925c8a5753ab2a274eca73c2e5"
   dependencies:
     "@types/axios" "^0.14.0"
     "@types/base-x" "^1.0.29"
