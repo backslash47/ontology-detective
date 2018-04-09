@@ -18,7 +18,7 @@
 
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { Table, Breadcrumb, Segment, Button, Popup, Header } from 'semantic-ui-react';
+import { Table, Breadcrumb, Segment, Button, Popup, Header, Loader } from 'semantic-ui-react';
 import { distanceInWordsToNow, format } from 'date-fns';
 import { Props } from './transfersGrid';
 import { AssetIdToName } from '~/const'; 
@@ -83,6 +83,13 @@ const Transfers: React.SFC<Props> = (props) => (
                     </Table.Row>
                 </Table.Header>
                 <Table.Body>
+                    {props.loading ? (
+                        <Table.Row>
+                            <Table.Cell colspan={6}>
+                                <Loader active={true} inline="centered"/>
+                            </Table.Cell>
+                        </Table.Row>
+                    ) : null}
                     {props.items.map(transfer => (
                         <Table.Row key={transfer.Id} negative={!transfer.Result}>
                             <Table.Cell selectable={true}>

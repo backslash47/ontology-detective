@@ -37,6 +37,7 @@ export interface PropsOwn<SC> extends QueryParams<SC> {
 }
 
 export interface State<T> {
+    loading: boolean;
     items: T[];
     count: number;
     firstIndex: number;

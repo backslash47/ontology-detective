@@ -18,7 +18,7 @@
 
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { Table, Breadcrumb, Segment, Button, Popup, Header } from 'semantic-ui-react';
+import { Table, Breadcrumb, Segment, Button, Popup, Header, Loader } from 'semantic-ui-react';
 import { distanceInWordsToNow, format } from 'date-fns';
 import { Props } from './blocksGrid';
 
@@ -36,28 +36,28 @@ const Blocks: React.SFC<Props> = (props: Props) => (
                 <Table.Header>
                     <Table.Row>
                         <Table.HeaderCell
-                            width={1}
+                            width={2}
                             sorted={props.sort === 'Height' ? props.order : undefined}
                             selectable={true}
                         >
                             <Link to={props.getColumnSortLink('Height')}>Height</Link>
                         </Table.HeaderCell>
                         <Table.HeaderCell
-                            width={4}
+                            width={10}
                             sorted={props.sort === 'Hash' ? props.order : undefined}
                             selectable={true}
                         >
                             <Link to={props.getColumnSortLink('Hash')}>Hash</Link>
                         </Table.HeaderCell>
                         <Table.HeaderCell
-                            width={1}
+                            width={2}
                             sorted={props.sort === 'TransactionsCount' ? props.order : undefined}
                             selectable={true}
                         >
                             <Link to={props.getColumnSortLink('TransactionsCount')}>Transactions</Link>
                         </Table.HeaderCell>
                         <Table.HeaderCell
-                            width={1}
+                            width={2}
                             sorted={props.sort === 'Timestamp' ? props.order : undefined}
                             selectable={true}
                         >
@@ -66,6 +66,13 @@ const Blocks: React.SFC<Props> = (props: Props) => (
                     </Table.Row>
                 </Table.Header>
                 <Table.Body>
+                    {props.loading ? (
+                        <Table.Row>
+                            <Table.Cell colspan={6}>
+                                <Loader active={true} inline="centered"/>
+                            </Table.Cell>
+                        </Table.Row>
+                    ) : null}
                     {props.items.map(block => (
                         <Table.Row key={block.Hash}>
                             <Table.Cell selectable={true}>

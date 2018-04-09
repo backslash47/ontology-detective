@@ -18,7 +18,7 @@
 
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { Table, Breadcrumb, Segment, Button, Popup, Header } from 'semantic-ui-react';
+import { Table, Breadcrumb, Segment, Button, Popup, Header, Loader } from 'semantic-ui-react';
 import { distanceInWordsToNow, format } from 'date-fns';
 import { Props } from './transactionsGrid';
 import { TxName } from '~/shared/ont/model'; 
@@ -41,27 +41,34 @@ const Transactions: React.SFC<Props> = (props) => (
                         <Table.HeaderCell
                             sorted={props.sort === 'TxType' ? props.order : undefined}
                             selectable={true}
-                            width={1}
+                            width={3}
                         >
                             <Link to={props.getColumnSortLink('TxType')}>Type</Link>
                         </Table.HeaderCell>
                         <Table.HeaderCell
                             sorted={props.sort === 'Hash' ? props.order : undefined}
                             selectable={true}
-                            width={5}
+                            width={11}
                         >
                             <Link to={props.getColumnSortLink('Hash')}>Hash</Link>
                         </Table.HeaderCell>
                         <Table.HeaderCell
                             sorted={props.sort === 'Timestamp' ? props.order : undefined}
                             selectable={true}
-                            width={1}
+                            width={2}
                         >
                             <Link to={props.getColumnSortLink('Timestamp')}>Time</Link>
                         </Table.HeaderCell>
                     </Table.Row>
                 </Table.Header>
                 <Table.Body>
+                    {props.loading ? (
+                        <Table.Row>
+                            <Table.Cell colspan={6}>
+                                <Loader active={true} inline="centered"/>
+                            </Table.Cell>
+                        </Table.Row>
+                    ) : null}
                     {props.items.map(transaction => (
                         <Table.Row key={transaction.Hash}>
                             <Table.Cell selectable={true}>

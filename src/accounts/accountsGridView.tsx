@@ -20,7 +20,7 @@ import * as React from 'react';
 import { Link } from 'react-router-dom';
 import { distanceInWordsToNow, format } from 'date-fns';
 import { get, find } from 'lodash';
-import { Segment, Breadcrumb, Table, Button, Popup, Header } from 'semantic-ui-react';
+import { Segment, Breadcrumb, Table, Button, Popup, Header, Loader } from 'semantic-ui-react';
 import { Props } from './accountsGrid';
 import { Assets } from '~/const';
 
@@ -34,42 +34,57 @@ const Accounts: React.SFC<Props> = (props) => (
             </Header>
         </Segment>
         <Segment>
-            <Table celled={false} basic="very" selectable={true} sortable={true}>
+            <Table celled={false} basic="very" selectable={true} sortable={true} fixed={true}>
                 <Table.Header>
                     <Table.Row>
                         <Table.HeaderCell
                             sorted={props.sort === 'address' ? props.order : undefined}
                             selectable={true}
+                            width={6}
                         >
                             <Link to={props.getColumnSortLink('address')}>Address</Link>
                         </Table.HeaderCell>
                         <Table.HeaderCell
                             sorted={props.sort === 'firstTime' ? props.order : undefined}
                             selectable={true}
+                            width={2}
                         >
                             <Link to={props.getColumnSortLink('firstTime')}>Created</Link>
                         </Table.HeaderCell>
                         <Table.HeaderCell
                             sorted={props.sort === 'lastTime' ? props.order : undefined}
                             selectable={true}
+                            width={2}
                         >
                             <Link to={props.getColumnSortLink('lastTime')}>Last transaction</Link>
                         </Table.HeaderCell>
                         <Table.HeaderCell
                             sorted={props.sort === 'transactionsCount' ? props.order : undefined}
                             selectable={true}
+                            width={2}
                         >
                             <Link to={props.getColumnSortLink('transactionsCount')}>Transfers</Link>
                         </Table.HeaderCell>
-                        <Table.HeaderCell>
+                        <Table.HeaderCell
+                            width={2}
+                        >
                             ONT
                         </Table.HeaderCell>
-                        <Table.HeaderCell>
+                        <Table.HeaderCell
+                            width={2}
+                        >
                             ONG
                         </Table.HeaderCell>
                     </Table.Row>
                 </Table.Header>
                 <Table.Body>
+                    {props.loading ? (
+                        <Table.Row>
+                            <Table.Cell colspan={6}>
+                                <Loader active={true} inline="centered"/>
+                            </Table.Cell>
+                        </Table.Row>
+                    ) : null}
                     {props.items.map(account => (
                         <Table.Row key={account.address}>
                             <Table.Cell selectable={true}>

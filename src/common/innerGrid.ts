@@ -35,6 +35,7 @@ function innerGrid<T, SC>(prefix: string): ComponentEnhancer<PropsInner<T, SC>, 
             };
         }),
         withState<PropsOuter<T, SC>, State<T>, 'state', 'setState'>('state', 'setState', ({ location }) => ({
+            loading: false,
             items: [],
             count: 0,
             prevLink: location,
@@ -49,8 +50,11 @@ function innerGrid<T, SC>(prefix: string): ComponentEnhancer<PropsInner<T, SC>, 
                 pageSize, 
                 setState, 
                 location, 
-                dataLoader 
+                dataLoader,
+                state
             }) => async (page: number, sort: SC, order: Direction) => {
+
+                setState({...state, loading: true});
                 
                 const { count, items } = await dataLoader(page * pageSize, pageSize, sort, order);
 
@@ -66,6 +70,7 @@ function innerGrid<T, SC>(prefix: string): ComponentEnhancer<PropsInner<T, SC>, 
                     location;
 
                 setState({
+                    loading: false,
                     items,
                     count,
                     firstIndex,

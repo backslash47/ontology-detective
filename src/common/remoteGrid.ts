@@ -35,6 +35,7 @@ function remoteGrid<T, SC>(): ComponentEnhancer<PropsInner<T, SC>, PropsOuter<T,
             };
         }),
         withState<PropsOuter<T, SC>, State<T>, 'state', 'setState'>('state', 'setState', ({ location }) => ({
+            loading: false,
             items: [],
             count: 0,
             prevLink: location,
@@ -49,8 +50,11 @@ function remoteGrid<T, SC>(): ComponentEnhancer<PropsInner<T, SC>, PropsOuter<T,
                 pageSize, 
                 setState, 
                 location, 
-                dataLoader 
+                dataLoader,
+                state 
             }) => async (page: number, sort: SC, order: Direction) => {
+
+                setState({...state, loading: true});
                 
                 const { count, items } = await dataLoader(page * pageSize, pageSize, sort, order);
 
@@ -61,6 +65,7 @@ function remoteGrid<T, SC>(): ComponentEnhancer<PropsInner<T, SC>, PropsOuter<T,
                 const nextLink = lastIndex < count ? changeQueryParam(location, 'page', String(page + 1)) : location;
 
                 setState({
+                    loading: false,
                     items,
                     count,
                     firstIndex,
