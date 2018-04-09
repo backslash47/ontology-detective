@@ -18,7 +18,7 @@
 
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { Breadcrumb, Segment, Table, Header, Popup } from 'semantic-ui-react';
+import { Breadcrumb, Segment, Table, Header, Popup, Loader } from 'semantic-ui-react';
 import { distanceInWordsToNow, format } from 'date-fns';
 import BlockTransactions from './blockTransactions';
 import BlockTransfers from './blockTransfers';
@@ -31,47 +31,59 @@ const Block: React.SFC<Props> = (props) => (
                 <Breadcrumb size="huge">
                     <Breadcrumb.Section as={Link} to="/blocks">Blocks</Breadcrumb.Section>
                     <Breadcrumb.Divider icon="right chevron" />
-                    <Breadcrumb.Section active={true}>{props.block.Height}</Breadcrumb.Section>
+                    <Breadcrumb.Section active={true}>
+                        {props.loaded ? props.block.Height : 'Loading'}
+                    </Breadcrumb.Section>
                 </Breadcrumb>
             </Header>
         </Segment>
         <Segment>
             <Table celled={false} basic="very" selectable={true} fixed={true}>
-                <Table.Body>
-                    <Table.Row>
-                        <Table.Cell width={1}>Hash</Table.Cell>
-                        <Table.Cell width={1}>{props.block.Hash}</Table.Cell>
-                    </Table.Row>
-                    <Table.Row>
-                        <Table.Cell width={1}>Height</Table.Cell>
-                        <Table.Cell width={1}>{props.block.Height}</Table.Cell>
-                    </Table.Row>
-                    <Table.Row>
-                        <Table.Cell width={1}>Time</Table.Cell>
-                        <Table.Cell width={1}>
-                            <Popup trigger={<span>{distanceInWordsToNow(props.block.Timestamp)}</span>}>
-                                {format(props.block.Timestamp, 'MMM Do YYYY HH:mm:ss')}
-                            </Popup>
-                        </Table.Cell>
-                    </Table.Row>
-                    <Table.Row>
-                        <Table.Cell width={1}>Validator</Table.Cell>
-                        <Table.Cell width={1}>{props.block.NextBookkeeper}</Table.Cell>
-                    </Table.Row>
-                    <Table.Row>
-                        <Table.Cell width={1}>Version</Table.Cell>
-                        <Table.Cell width={1}>{props.block.Version}</Table.Cell>
-                    </Table.Row>
-                    <Table.Row>
-                        <Table.Cell width={1}>Merkle root</Table.Cell>
-                        <Table.Cell width={1}>{props.block.TransactionsRoot}</Table.Cell>
-                    </Table.Row>
-                </Table.Body>
+                {!props.loaded ? (
+                    <Table.Body>
+                        <Table.Row>
+                            <Table.Cell colSpan={2}>
+                                <Loader active={true} inline="centered"/>
+                            </Table.Cell>
+                        </Table.Row>
+                    </Table.Body>
+                ) : (
+                    <Table.Body>
+                        <Table.Row>
+                            <Table.Cell width={1}>Hash</Table.Cell>
+                            <Table.Cell width={1}>{props.block.Hash}</Table.Cell>
+                        </Table.Row>
+                        <Table.Row>
+                            <Table.Cell width={1}>Height</Table.Cell>
+                            <Table.Cell width={1}>{props.block.Height}</Table.Cell>
+                        </Table.Row>
+                        <Table.Row>
+                            <Table.Cell width={1}>Time</Table.Cell>
+                            <Table.Cell width={1}>
+                                <Popup trigger={<span>{distanceInWordsToNow(props.block.Timestamp)}</span>}>
+                                    {format(props.block.Timestamp, 'MMM Do YYYY HH:mm:ss')}
+                                </Popup>
+                            </Table.Cell>
+                        </Table.Row>
+                        <Table.Row>
+                            <Table.Cell width={1}>Validator</Table.Cell>
+                            <Table.Cell width={1}>{props.block.NextBookkeeper}</Table.Cell>
+                        </Table.Row>
+                        <Table.Row>
+                            <Table.Cell width={1}>Version</Table.Cell>
+                            <Table.Cell width={1}>{props.block.Version}</Table.Cell>
+                        </Table.Row>
+                        <Table.Row>
+                            <Table.Cell width={1}>Merkle root</Table.Cell>
+                            <Table.Cell width={1}>{props.block.TransactionsRoot}</Table.Cell>
+                        </Table.Row>
+                    </Table.Body>
+                )}
             </Table>
         </Segment>
 
-        <BlockTransactions blockHash={props.block.Hash} location={props.location} />
-        <BlockTransfers blockHash={props.block.Hash} location={props.location} />
+        <BlockTransactions blockHash={props.blockHash} location={props.location} />
+        <BlockTransfers blockHash={props.blockHash} location={props.location} />
     </Segment.Group>
 );
 

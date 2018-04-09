@@ -16,7 +16,7 @@
  * along with The ONT Detective.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { compose, lifecycle, branch, renderNothing, withProps, withState, flattenProp } from 'recompose';
+import { compose, lifecycle, withProps, withState, flattenProp } from 'recompose';
 import { match } from 'react-router';
 import { Location } from 'history';
 import { StateSetter } from '~/utils';
@@ -38,7 +38,7 @@ interface State {
     loaded: boolean;
 }
 
-export interface PropsInner extends State, PropsOuter {
+export interface PropsInner extends State, PropsOwn, PropsOuter {
 }
 
 export default compose<PropsInner, PropsOuter>(
@@ -58,9 +58,5 @@ export default compose<PropsInner, PropsOuter>(
             });
         }
     }),
-    flattenProp('state'),
-    branch<State>(
-        ({loaded}) => !loaded,
-        renderNothing
-    )
+    flattenProp('state')
 ) (View);

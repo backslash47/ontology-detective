@@ -18,7 +18,7 @@
 
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { Breadcrumb, Segment, Table, Header, Popup } from 'semantic-ui-react';
+import { Breadcrumb, Segment, Table, Header, Popup, Loader } from 'semantic-ui-react';
 import { distanceInWordsToNow, format } from 'date-fns';
 import { TxName } from '~/shared/ont/model'; 
 import { PropsInner as Props } from './transactionDetail';
@@ -31,40 +31,52 @@ const Transaction: React.SFC<Props> = (props) => (
                 <Breadcrumb size="huge">
                     <Breadcrumb.Section as={Link} to="/transactions">Transactions</Breadcrumb.Section>
                     <Breadcrumb.Divider icon="right chevron" />
-                    <Breadcrumb.Section active={true}>{props.transaction.Hash}</Breadcrumb.Section>
+                    <Breadcrumb.Section active={true}>{props.txId}</Breadcrumb.Section>
                 </Breadcrumb>
             </Header>
         </Segment>
         <Segment>
             <Table celled={false} basic="very" selectable={true} fixed={true}>
-                <Table.Body>
-                    <Table.Row>
-                        <Table.Cell width={1}>Type</Table.Cell>
-                        <Table.Cell width={1}>{TxName[props.transaction.TxType]}</Table.Cell>
-                    </Table.Row>
-                    <Table.Row>
-                        <Table.Cell width={1}>Time</Table.Cell>
-                        <Table.Cell width={1}>
-                            <Popup trigger={<span>{distanceInWordsToNow(props.transaction.Timestamp)}</span>}>
-                                {format(props.transaction.Timestamp, 'MMM Do YYYY HH:mm:ss')}
-                            </Popup>
-                        </Table.Cell>
-                    </Table.Row>
-                    <Table.Row>
-                        <Table.Cell width={1}>Network fee</Table.Cell>
-                        <Table.Cell width={1}>{props.transaction.NetworkFee} ONG</Table.Cell>
-                    </Table.Row>
-                    <Table.Row>
-                        <Table.Cell width={1}>Block</Table.Cell>
-                        <Table.Cell width={1}>
-                            <Link to={`/blocks/${props.transaction.BlockHash}`}>{props.transaction.BlockIndex}</Link>
-                        </Table.Cell>
-                    </Table.Row>
-                </Table.Body>
+                {!props.loaded ? (
+                    <Table.Body>
+                        <Table.Row>
+                            <Table.Cell colSpan={2}>
+                                <Loader active={true} inline="centered"/>
+                            </Table.Cell>
+                        </Table.Row>
+                    </Table.Body>
+                ) : (
+                    <Table.Body>
+                        <Table.Row>
+                            <Table.Cell width={1}>Type</Table.Cell>
+                            <Table.Cell width={1}>{TxName[props.transaction.TxType]}</Table.Cell>
+                        </Table.Row>
+                        <Table.Row>
+                            <Table.Cell width={1}>Time</Table.Cell>
+                            <Table.Cell width={1}>
+                                <Popup trigger={<span>{distanceInWordsToNow(props.transaction.Timestamp)}</span>}>
+                                    {format(props.transaction.Timestamp, 'MMM Do YYYY HH:mm:ss')}
+                                </Popup>
+                            </Table.Cell>
+                        </Table.Row>
+                        <Table.Row>
+                            <Table.Cell width={1}>Network fee</Table.Cell>
+                            <Table.Cell width={1}>{props.transaction.NetworkFee} ONG</Table.Cell>
+                        </Table.Row>
+                        <Table.Row>
+                            <Table.Cell width={1}>Block</Table.Cell>
+                            <Table.Cell width={1}>
+                                <Link to={`/blocks/${props.transaction.BlockHash}`}>
+                                    {props.transaction.BlockIndex}
+                                </Link>
+                            </Table.Cell>
+                        </Table.Row>
+                    </Table.Body>
+                )}
             </Table>
         </Segment>
 
-        <TransactionTransfers transactionHash={props.transaction.Hash} location={props.location} />
+        <TransactionTransfers transactionHash={props.txId} location={props.location} />
     </Segment.Group>
 );
 

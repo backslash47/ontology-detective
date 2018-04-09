@@ -64,7 +64,7 @@ const Transactions: React.SFC<Props> = (props) => (
                 <Table.Body>
                     {props.loading ? (
                         <Table.Row>
-                            <Table.Cell colspan={6}>
+                            <Table.Cell colSpan={6}>
                                 <Loader active={true} inline="centered"/>
                             </Table.Cell>
                         </Table.Row>

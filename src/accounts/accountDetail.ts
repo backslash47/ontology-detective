@@ -16,7 +16,7 @@
  * along with The ONT Detective.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { compose, lifecycle, branch, renderNothing, withProps, withState, flattenProp } from 'recompose';
+import { compose, lifecycle, withProps, withState, flattenProp } from 'recompose';
 import { match } from 'react-router';
 import { Location } from 'history';
 import { StateSetter } from '~/utils';
@@ -30,7 +30,7 @@ interface PropsOuter {
 }
 
 interface PropsOwn {
-    txId: string;
+    accountId: string;
 }
 
 interface State {
@@ -38,19 +38,19 @@ interface State {
     loaded: boolean;
 }
 
-export interface PropsInner extends State, PropsOuter {
+export interface PropsInner extends State, PropsOwn, PropsOuter {
 }
 
 export default compose<PropsInner, PropsOuter>(
     withProps<PropsOwn, PropsOuter>(props => ({
-        txId: props.match.params.id
+        accountId: props.match.params.id
     })),
     withState<null, Partial<State>, 'state', 'setState'>('state', 'setState', {
         loaded: false
     }),
     lifecycle<PropsOwn & StateSetter<State>, null>({
         async componentDidMount() {
-            const account = await getAccount(this.props.txId);
+            const account = await getAccount(this.props.accountId);
             
             this.props.setState({
                 account,
@@ -58,9 +58,5 @@ export default compose<PropsInner, PropsOuter>(
             });
         }
     }),
-    flattenProp('state'),
-    branch<State>(
-        ({loaded}) => !loaded,
-        renderNothing
-    )
+    flattenProp('state')
 ) (View);

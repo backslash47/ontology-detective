@@ -18,7 +18,7 @@
 
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { Breadcrumb, Segment, Table, Header, Popup } from 'semantic-ui-react';
+import { Breadcrumb, Segment, Table, Header, Popup, Loader } from 'semantic-ui-react';
 import { distanceInWordsToNow, format } from 'date-fns';
 import { AssetIdToName } from '~/const'; 
 import { PropsInner as Props } from './transferDetail';
@@ -30,52 +30,62 @@ const Transfer: React.SFC<Props> = (props) => (
                 <Breadcrumb size="huge">
                     <Breadcrumb.Section as={Link} to="/transfers">Transfers</Breadcrumb.Section>
                     <Breadcrumb.Divider icon="right chevron" />
-                    <Breadcrumb.Section active={true}>{props.transfer.Id}</Breadcrumb.Section>
+                    <Breadcrumb.Section active={true}>{props.id}</Breadcrumb.Section>
                 </Breadcrumb>
             </Header>
         </Segment>
         <Segment>
             <Table celled={false} basic="very" selectable={true} fixed={true}>
-                <Table.Body>
-                    <Table.Row>
-                        <Table.Cell width={1}>Asset</Table.Cell>
-                        <Table.Cell width={1} className="bold">
-                            {props.transfer.Value} {AssetIdToName[props.transfer.Asset]}
-                        </Table.Cell>
-                    </Table.Row>
-                    <Table.Row>
-                        <Table.Cell width={1}>Time</Table.Cell>
-                        <Table.Cell width={1}>
-                            <Popup trigger={<span>{distanceInWordsToNow(props.transfer.Timestamp)}</span>}>
-                                {format(props.transfer.Timestamp, 'MMM Do YYYY HH:mm:ss')}
-                            </Popup>
-                        </Table.Cell>
-                    </Table.Row>
-                    <Table.Row>
-                        <Table.Cell width={1}>From</Table.Cell>
-                        <Table.Cell width={1}>
-                            <Link to={`/accounts/${props.transfer.From}`}>{props.transfer.From}</Link>
-                        </Table.Cell>
-                    </Table.Row>
-                    <Table.Row>
-                        <Table.Cell width={1}>To</Table.Cell>
-                        <Table.Cell width={1}>
-                            <Link to={`/accounts/${props.transfer.To}`}>{props.transfer.To}</Link>
-                        </Table.Cell>
-                    </Table.Row>
-                    <Table.Row>
-                        <Table.Cell width={1}>Transaction</Table.Cell>
-                        <Table.Cell width={1}>
-                            <Link to={`/transactions/${props.transfer.TxHash}`}>{props.transfer.TxHash}</Link>
-                        </Table.Cell>
-                    </Table.Row>
-                    <Table.Row>
-                        <Table.Cell width={1}>Block</Table.Cell>
-                        <Table.Cell width={1}>
-                            <Link to={`/blocks/${props.transfer.BlockHash}`}>{props.transfer.BlockIndex}</Link>
-                        </Table.Cell>
-                    </Table.Row>
-                </Table.Body>
+                {!props.loaded ? (
+                    <Table.Body>
+                        <Table.Row>
+                            <Table.Cell colSpan={2}>
+                                <Loader active={true} inline="centered"/>
+                            </Table.Cell>
+                        </Table.Row>
+                    </Table.Body>
+                ) : (
+                    <Table.Body>
+                        <Table.Row>
+                            <Table.Cell width={1}>Asset</Table.Cell>
+                            <Table.Cell width={1} className="bold">
+                                {props.transfer.Value} {AssetIdToName[props.transfer.Asset]}
+                            </Table.Cell>
+                        </Table.Row>
+                        <Table.Row>
+                            <Table.Cell width={1}>Time</Table.Cell>
+                            <Table.Cell width={1}>
+                                <Popup trigger={<span>{distanceInWordsToNow(props.transfer.Timestamp)}</span>}>
+                                    {format(props.transfer.Timestamp, 'MMM Do YYYY HH:mm:ss')}
+                                </Popup>
+                            </Table.Cell>
+                        </Table.Row>
+                        <Table.Row>
+                            <Table.Cell width={1}>From</Table.Cell>
+                            <Table.Cell width={1}>
+                                <Link to={`/accounts/${props.transfer.From}`}>{props.transfer.From}</Link>
+                            </Table.Cell>
+                        </Table.Row>
+                        <Table.Row>
+                            <Table.Cell width={1}>To</Table.Cell>
+                            <Table.Cell width={1}>
+                                <Link to={`/accounts/${props.transfer.To}`}>{props.transfer.To}</Link>
+                            </Table.Cell>
+                        </Table.Row>
+                        <Table.Row>
+                            <Table.Cell width={1}>Transaction</Table.Cell>
+                            <Table.Cell width={1}>
+                                <Link to={`/transactions/${props.transfer.TxHash}`}>{props.transfer.TxHash}</Link>
+                            </Table.Cell>
+                        </Table.Row>
+                        <Table.Row>
+                            <Table.Cell width={1}>Block</Table.Cell>
+                            <Table.Cell width={1}>
+                                <Link to={`/blocks/${props.transfer.BlockHash}`}>{props.transfer.BlockIndex}</Link>
+                            </Table.Cell>
+                        </Table.Row>
+                    </Table.Body>
+                )}
             </Table>
         </Segment>
     </Segment.Group>

@@ -18,7 +18,7 @@
 
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { Breadcrumb, Segment, Table, Header, Popup } from 'semantic-ui-react';
+import { Breadcrumb, Segment, Table, Header, Popup, Loader } from 'semantic-ui-react';
 import { distanceInWordsToNow, format } from 'date-fns';
 import { AssetIdToName } from '~/const';
 import { PropsInner as Props } from './accountDetail';
@@ -31,55 +31,67 @@ const Transaction: React.SFC<Props> = (props) => (
                 <Breadcrumb size="huge">
                     <Breadcrumb.Section as={Link} to="/accounts">Accounts</Breadcrumb.Section>
                     <Breadcrumb.Divider icon="right chevron" />
-                    <Breadcrumb.Section active={true}>{props.account.address}</Breadcrumb.Section>
+                    <Breadcrumb.Section active={true}>{props.accountId}</Breadcrumb.Section>
                 </Breadcrumb>
             </Header>
         </Segment>
         <Segment>
             <Table celled={false} basic="very" selectable={true} fixed={true}>
-                <Table.Body>
-                    <Table.Row>
-                        <Table.Cell width={1}>Created</Table.Cell>
-                        <Table.Cell width={1}>
-                            <Link to={`/transactions/${props.account.firstTx}`}>
-                                <Popup trigger={<span>{distanceInWordsToNow(props.account.firstTime)}</span>}>
-                                    {format(props.account.firstTime, 'MMM Do YYYY HH:mm:ss')}
-                                </Popup>
-                            </Link>
-                        </Table.Cell>
-                    </Table.Row>
-                    <Table.Row>
-                        <Table.Cell width={1}>Last transaction</Table.Cell>
-                        <Table.Cell width={1}>
-                            <Link to={`/transactions/${props.account.lastTx}`}>
-                                <Popup trigger={<span>{distanceInWordsToNow(props.account.lastTime)}</span>}>
-                                    {format(props.account.lastTime, 'MMM Do YYYY HH:mm:ss')}
-                                </Popup>
-                            </Link>
-                        </Table.Cell>
-                    </Table.Row>
-                    <Table.Row>
-                        <Table.Cell width={1}>Transactions count</Table.Cell>
-                        <Table.Cell width={1}>{props.account.transactionsCount}</Table.Cell>
-                    </Table.Row>
-                </Table.Body>
+                {!props.loaded ? (
+                    <Table.Body>
+                        <Table.Row>
+                            <Table.Cell colSpan={2}>
+                                <Loader active={true} inline="centered"/>
+                            </Table.Cell>
+                        </Table.Row>
+                    </Table.Body>
+                ) : (
+                    <Table.Body>
+                        <Table.Row>
+                            <Table.Cell width={1}>Created</Table.Cell>
+                            <Table.Cell width={1}>
+                                <Link to={`/transactions/${props.account.firstTx}`}>
+                                    <Popup trigger={<span>{distanceInWordsToNow(props.account.firstTime)}</span>}>
+                                        {format(props.account.firstTime, 'MMM Do YYYY HH:mm:ss')}
+                                    </Popup>
+                                </Link>
+                            </Table.Cell>
+                        </Table.Row>
+                        <Table.Row>
+                            <Table.Cell width={1}>Last transaction</Table.Cell>
+                            <Table.Cell width={1}>
+                                <Link to={`/transactions/${props.account.lastTx}`}>
+                                    <Popup trigger={<span>{distanceInWordsToNow(props.account.lastTime)}</span>}>
+                                        {format(props.account.lastTime, 'MMM Do YYYY HH:mm:ss')}
+                                    </Popup>
+                                </Link>
+                            </Table.Cell>
+                        </Table.Row>
+                        <Table.Row>
+                            <Table.Cell width={1}>Transactions count</Table.Cell>
+                            <Table.Cell width={1}>{props.account.transactionsCount}</Table.Cell>
+                        </Table.Row>
+                    </Table.Body>
+                )}
             </Table>
         </Segment>
-        <Segment>
-            <Header as="h2">Assets</Header>
-                <Table celled={false} basic="very" selectable={true} fixed={true}>
-                    <Table.Body>
-                        {props.account.assets.map(assetBalance => (
-                            <Table.Row>
-                                <Table.Cell width={1} >{AssetIdToName[assetBalance.asset]}</Table.Cell>
-                                <Table.Cell width={1} className="bold">{assetBalance.balance}</Table.Cell>
-                            </Table.Row>
-                        ))}
-                    </Table.Body>
-                </Table>
-        </Segment>
+        {props.loaded ? (
+            <Segment>
+                <Header as="h2">Assets</Header>
+                    <Table celled={false} basic="very" selectable={true} fixed={true}>
+                        <Table.Body>
+                            {props.account.assets.map(assetBalance => (
+                                <Table.Row>
+                                    <Table.Cell width={1} >{AssetIdToName[assetBalance.asset]}</Table.Cell>
+                                    <Table.Cell width={1} className="bold">{assetBalance.balance}</Table.Cell>
+                                </Table.Row>
+                            ))}
+                        </Table.Body>
+                    </Table>
+            </Segment>
+        ) : null}
         
-        <AccountTransfers address={props.account.address} location={props.location} />
+        <AccountTransfers address={props.accountId} location={props.location} />
     </Segment.Group>
 );
 
