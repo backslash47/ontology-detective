@@ -18,53 +18,50 @@
 
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { Table, Breadcrumb, Segment, Button, Popup, Header, Loader } from 'semantic-ui-react';
 import { distanceInWordsToNow, format } from 'date-fns';
-import { Props } from './transactionsGrid';
-import { TxName } from '~/shared/ont/model'; 
+import { Segment, Breadcrumb, Table, Button, Popup, Header, Loader } from 'semantic-ui-react';
+import { Props } from './ontIdsGrid';
 
-const Transactions: React.SFC<Props> = (props) => (
+const OntIds: React.SFC<Props> = (props) => (
     <Segment.Group>
-        {!props.hideTitle ? (
-            <Segment>
-                <Header as="h2">
-                    <Breadcrumb size="huge">
-                        <Breadcrumb.Section active={true}>Transactions</Breadcrumb.Section>
-                    </Breadcrumb>
-                </Header>
-            </Segment>
-        ) : null }
+        <Segment>
+            <Header as="h2">
+                <Breadcrumb size="huge">
+                    <Breadcrumb.Section active={true}>Ont Ids</Breadcrumb.Section>
+                </Breadcrumb>
+            </Header>
+        </Segment>
         <Segment>
             <Table celled={false} basic="very" selectable={true} sortable={true} fixed={true}>
                 <Table.Header>
                     <Table.Row>
                         <Table.HeaderCell
-                            sorted={props.sort === 'TxType' ? props.order : undefined}
+                            sorted={props.sort === 'Id' ? props.order : undefined}
+                            selectable={true}
+                            width={9}
+                        >
+                            <Link to={props.getColumnSortLink('Id')}>Ont Id</Link>
+                        </Table.HeaderCell>
+                        <Table.HeaderCell
+                            sorted={props.sort === 'RegistrationTimestamp' ? props.order : undefined}
                             selectable={true}
                             width={3}
                         >
-                            <Link to={props.getColumnSortLink('TxType')}>Type</Link>
+                            <Link to={props.getColumnSortLink('RegistrationTimestamp')}>Created</Link>
                         </Table.HeaderCell>
                         <Table.HeaderCell
-                            sorted={props.sort === 'Hash' ? props.order : undefined}
+                            sorted={props.sort === 'LastTimestamp' ? props.order : undefined}
                             selectable={true}
-                            width={10}
+                            width={3}
                         >
-                            <Link to={props.getColumnSortLink('Hash')}>Hash</Link>
+                            <Link to={props.getColumnSortLink('LastTimestamp')}>Last modified</Link>
                         </Table.HeaderCell>
                         <Table.HeaderCell
-                            sorted={props.sort === 'Timestamp' ? props.order : undefined}
+                            sorted={props.sort === 'ClaimsCount' ? props.order : undefined}
                             selectable={true}
                             width={2}
                         >
-                            <Link to={props.getColumnSortLink('Timestamp')}>Time</Link>
-                        </Table.HeaderCell>
-                        <Table.HeaderCell
-                            sorted={props.sort === 'Result' ? props.order : undefined}
-                            selectable={true}
-                            width={1}
-                        >
-                            <Link to={props.getColumnSortLink('Result')}>Result</Link>
+                            <Link to={props.getColumnSortLink('ClaimsCount')}>Claims</Link>
                         </Table.HeaderCell>
                     </Table.Row>
                 </Table.Header>
@@ -76,25 +73,27 @@ const Transactions: React.SFC<Props> = (props) => (
                             </Table.Cell>
                         </Table.Row>
                     ) : null}
-                    {props.items.map(transaction => (
-                        <Table.Row key={transaction.Hash}>
+                    {props.items.map(ontId => (
+                        <Table.Row key={ontId.Id}>
                             <Table.Cell selectable={true}>
-                                <Link to={`/transactions/${transaction.Hash}`}>{TxName[transaction.TxType]}</Link>
+                                <Link to={`/ont-ids/${ontId.Id}`}>{ontId.Id}</Link>
                             </Table.Cell>
                             <Table.Cell selectable={true}>
-                                <Link to={`/transactions/${transaction.Hash}`}>{transaction.Hash}</Link>
-                            </Table.Cell>
-                            <Table.Cell selectable={true}>
-                                <Link to={`/transactions/${transaction.Hash}`}>
-                                    <Popup trigger={<span>{distanceInWordsToNow(transaction.Timestamp)}</span>}>
-                                        {format(transaction.Timestamp, 'MMM Do YYYY HH:mm:ss')}
+                                <Link to={`/ont-ids/${ontId.Id}`}>
+                                    <Popup trigger={<span>{distanceInWordsToNow(ontId.RegistrationTimestamp)}</span>}>
+                                        {format(ontId.RegistrationTimestamp, 'MMM Do YYYY HH:mm:ss')}
                                     </Popup>
                                 </Link>
                             </Table.Cell>
                             <Table.Cell selectable={true}>
-                                <Link to={`/transactions/${transaction.Hash}`}>
-                                    {transaction.Result ? 'Success' : 'Failed'}
+                                <Link to={`/ont-ids/${ontId.LastTimestamp}`}>
+                                    <Popup trigger={<span>{distanceInWordsToNow(ontId.LastTimestamp)}</span>}>
+                                        {format(ontId.LastTimestamp, 'MMM Do YYYY HH:mm:ss')}
+                                    </Popup>
                                 </Link>
+                            </Table.Cell>
+                            <Table.Cell selectable={true}>
+                                <Link to={`/ont-ids/${ontId.Id}`}>{ontId.ClaimsCount}</Link>
                             </Table.Cell>
                         </Table.Row>
                     ))}
@@ -109,4 +108,4 @@ const Transactions: React.SFC<Props> = (props) => (
     </Segment.Group>
 );
 
-export default Transactions;
+export default OntIds;

@@ -23,7 +23,7 @@ import { Transfer } from './ont/model';
 import { Direction, Result } from '../common/gridTypes';
 
 export type SortColumn = 'Id' | 'TxHash' | 'BlockHash' | 'BlockIndex' | 
-    'From' | 'To' | 'Timestamp' | 'Value' | 'Asset' | 'Result';
+    'From' | 'To' | 'Timestamp' | 'Value' | 'Asset';
 
 export async function getBlockTransfers(
     BlockHash: string, 

@@ -16,7 +16,7 @@
  * along with The ONT Detective.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { login as loginElastic, initMappings } from '../shared/elastic/api';
+import { login as loginElastic, initMappings, initTxMappings } from '../shared/elastic/api';
 import { ingestBlocks, recalculateAccounts } from './ingestApi';
 import { getTransaction } from '../shared/transactionsApi';
 import { Token, utils } from 'ont-sdk-ts';
@@ -54,6 +54,12 @@ export async function recalculate() {
   login();
 
   await recalculateAccounts();
+}
+
+export async function fixTxMapping() {
+  login();
+  
+  await initTxMappings(true);
 }
 
 import 'make-runnable';

@@ -19,7 +19,7 @@
 import * as elasticsearch from 'elasticsearch';
 import * as HttpAmazonESConnector from 'http-aws-es';
 
-import { txMapping, Indices, blockMapping, accountMapping, TransferMapping } from './model';
+import { txMapping, Indices, blockMapping, accountMapping, TransferMapping, OntIdMapping } from './model';
 
 let hostSaved: string;
 let useAwsSaved: boolean = false;
@@ -44,14 +44,17 @@ export async function getInfo(): Promise<void> {
     console.log(result);
 }
 
-export async function initTxMappings(): Promise<void> {
+export async function initTxMappings(keepIndex?: boolean): Promise<void> {
     const client = getClient();
 
-    if (await client.indices.exists({ index: Indices.Tx })) {
-        await client.indices.delete({ index: Indices.Tx });
+    if (!keepIndex) {
+        if (await client.indices.exists({ index: Indices.Tx })) {
+            await client.indices.delete({ index: Indices.Tx });
+        }
+
+        await client.indices.create({ index: Indices.Tx });
     }
 
-    await client.indices.create({ index: Indices.Tx });
     await client.indices.putMapping({ index: Indices.Tx, type: 'default', body: txMapping });
 }
 
@@ -88,9 +91,21 @@ async function initBlockMappings(): Promise<void> {
     await client.indices.putMapping({ index: Indices.Block, type: 'default', body: blockMapping });
 }
 
+export async function initOntIdMapping(): Promise<void> {
+    const client = getClient();
+
+    if (await client.indices.exists({ index: Indices.OntId })) {
+        await client.indices.delete({ index: Indices.OntId });
+    }
+
+    await client.indices.create({ index: Indices.OntId });
+    await client.indices.putMapping({ index: Indices.OntId, type: 'default', body: OntIdMapping });
+}
+
 export async function initMappings(): Promise<void> {
     await initTxMappings();
     await initBlockMappings();
     await initAccountMappings();
     await initTransferMappings();
+    await initOntIdMapping();
 }

@@ -35,7 +35,8 @@
     "buildServer": "tsc -p src/server",
     "mappings": "node build/server/server mappings",
     "ingest": "node build/server/server ingest",
-    "recalculate": "node build/server/server recalculate"
+    "recalculate": "node build/server/server recalculate",
+    "fixTxMapping": "node build/server/server fixTxMapping"
   },
   "devDependencies": {
     "@types/elasticsearch": "^5.0.22",

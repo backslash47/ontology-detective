@@ -108,6 +108,9 @@ export interface Transaction {
     BlockHash: string;              // computed
     BlockIndex: number;             // computed
     Timestamp: number;              // computed
+    Result: boolean;                // computed
+    Events: Event[] | null;         // computed
+    EventsLoaded?: boolean;         // computed
 }
 
 export interface Payload {
@@ -149,5 +152,26 @@ export type Transfer = {
     Asset: string;
     Value: number;
     Timestamp: number;
-    Result: boolean;                // computed
+};
+
+export interface Event {
+    CodeHash: number[] | string;
+    States: (string | number[] | string[])[];
+    TxHash: number[] | string;
+}
+
+export type Claim = {
+    TxHash: string;
+    Timestamp: number;
+    Attribute: string;
+};
+
+export type OntId = {
+    Id: string;
+    RegistrationTxHash: string;
+    RegistrationTimestamp: number;
+    LastTimestamp: number;
+    LastTxHash: string;
+    Claims: Claim[];
+    ClaimsCount: number;
 };

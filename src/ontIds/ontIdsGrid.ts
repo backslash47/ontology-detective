@@ -16,29 +16,21 @@
  * along with The ONT Detective.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export enum Assets {
-    ONT = 'ff00000000000000000000000000000000000001',
-    ONG = 'ff00000000000000000000000000000000000002',
-    ONT_ID = '80e7d2fc22c24c466f44c7688569cc6e6d6c6f92',
-    ONT_ID2 = '8055b362904715fd84536e754868f4c8d27ca3f6'
-}
+import { compose, defaultProps } from 'recompose';
+import { RouteComponentProps } from 'react-router';
+import { getOntIds, SortColumn } from '~/shared/ontIdApi';
+import { OntId } from '~/shared/ont/model';
+import View from './ontIdsGridView';
+import remoteGrid from '~/common/remoteGrid';
+import { PropsInner } from '~/common/gridTypes';
 
-export enum OntIdAction {
-    Register = 'Register',
-    Attribute = 'Attribute'
-}
+export type Props = PropsInner<OntId, SortColumn>;
 
-export enum OntIdRegisterOperation {
-    register = 'register'
-}
-
-export enum OntIdAttributeOperation {
-    add = 'add'
-}
-
-export const AssetIdToName = {
-    [Assets.ONT] : 'ONT',
-    [Assets.ONG] : 'ONG',
-    [Assets.ONT_ID] : 'ONT ID',
-    [Assets.ONT_ID2] : 'ONT ID v2'
-};
+export default compose<Props, RouteComponentProps<{}>>(
+    defaultProps({
+        dataLoader: getOntIds,
+        sort: 'LastTimestamp',
+        order: 'descending'
+    }),
+    remoteGrid<OntId, SortColumn>()
+) (View);

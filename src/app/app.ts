@@ -55,6 +55,12 @@ const menu: Item[] = [
     label: 'Accounts',
     icon: 'users',
     link: '/accounts'
+  },
+  {
+    id: 'ontIds',
+    label: 'Ont Ids',
+    icon: 'id card',
+    link: '/ont-ids'
   }
 ];
 

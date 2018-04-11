@@ -27,6 +27,9 @@ import TransfersGrid from '~/transfers/transfersGrid';
 import TransferDetail from '~/transfers/transferDetail';
 import AccountsGrid from '~/accounts/accountsGrid';
 import AccountDetail from '~/accounts/accountDetail';
+import OntIdsGrid from '~/ontIds/ontIdsGrid';
+import OntIdDetail from '~/ontIds/ontIdDetail';
+
 import Sidebar from '~/sidebar/sidebar';
 import Footer from '~/footer/footer';
 import { PropsInner as Props } from './app';
@@ -43,6 +46,8 @@ const App: React.SFC<Props> = (props) => (
         <Route path="/transfers/:id" exact={true} component={TransferDetail} />
         <Route path="/accounts" exact={true} component={AccountsGrid} />
         <Route path="/accounts/:id" exact={true} component={AccountDetail} />
+        <Route path="/ont-ids" exact={true} component={OntIdsGrid} />
+        <Route path="/ont-ids/:id" exact={true} component={OntIdDetail} />
     </Sidebar>
   </Router>
 );

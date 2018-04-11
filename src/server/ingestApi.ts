@@ -18,16 +18,18 @@
 
 import ReconnectingWebSocket from './ReconnectingWebsocket';
 import * as Html5WebSocket from 'html5-websocket';
-import { find } from 'lodash';
-import { initAccountMappings, initTransferMappings } from '../shared/elastic/api';
-import { Account, TxType, Transaction, BlockWrapper } from '../shared/ont/model';
+import { find, get } from 'lodash';
+import axios from 'axios';
+import { initAccountMappings, initTransferMappings, initOntIdMapping, initTxMappings } from '../shared/elastic/api';
+import { Account, TxType, Transaction, BlockWrapper, Event, OntId } from '../shared/ont/model';
 import { getAccount, indexAccount } from '../shared/accountsApi';
 import { indexTransaction, getTransactions } from '../shared/transactionsApi';
 import { indexTransfer } from '../shared/transfersApi';
 import { indexBlock, getLastBlock } from '../shared/blocksApi';
+import { indexOntId, getOntId } from '../shared/ontIdApi';
 
 import { Token, utils, core, CONST } from 'ont-sdk-ts';
-import { Assets } from '../const';
+import { Assets, OntIdAction, OntIdAttributeOperation, OntIdRegisterOperation } from '../const';
 import { sleep } from '../utils';
 
 const { StringReader } = utils;
@@ -70,7 +72,8 @@ async function changeBalance(u160Address: string, assetAddress: string, value: n
 
     for (let assetBalance of account.assets) {
         if (assetBalance.balance < 0) {
-            throw new Error('Incorrect transaction.');
+            //throw new Error('Incorrect transaction.');
+            console.log('Wrong balance on ', account.address);
         }
     }
 
@@ -85,83 +88,108 @@ function setCharAt(str: string, index: number, chr: string) {
     return str.substr(0, index) + chr + str.substr(index + 1);
 }
 
-async function ingestTransfer(transaction: Transaction): Promise<void> {
+async function ingestContract(transaction: Transaction): Promise<void> {
+    if (transaction.EventsLoaded !== true) {
+        // load events only if not loaded yet
+        const events = await fetchEvents(transaction.Hash);
+        
+        // save loaded events
+        transaction.Events = events;
+        transaction.Result = transaction.Events !== null;
+        transaction.EventsLoaded = true;
+    }
 
-    if (transaction.TxType === TxType.Invoke) {
-        if (transaction.Payload.VmType === 0xFF) {
-            try {
-                const contract = Contract.deserialize(new StringReader(transaction.Payload.Code));
-
-                if (contract.method === 'transfer') {
-                    const transfersOnt = Transfers.deserialize(new StringReader(contract.args));
-
-                    for (let i = 0; i < transfersOnt.states.length; i++) {
-                        const state = transfersOnt.states[i];
-
-                        const transfer = {
-                            Id: transaction.Hash + '-' + i,
-                            Asset: contract.address,
-                            Value: Number(state.value),
-                            From: core.u160ToAddress(state.from),
-                            To: core.u160ToAddress(state.to),
-                            TxHash: transaction.Hash,
-                            BlockHash: transaction.BlockHash,
-                            BlockIndex: transaction.BlockIndex,
-                            Timestamp: transaction.Timestamp,
-                            Result: true
-                        };
-
-                        try {
-                            await changeBalance(state.from, contract.address, -Number(state.value), transaction);
-                            await changeBalance(state.to, contract.address, Number(state.value), transaction);
-                        } catch (e) {
-                            console.log('Failed to process transfer', transaction.Hash);
-                            transfer.Result = false;
-                        }
-
-                        await indexTransfer(transfer);
-                    }
-                } else if (contract.method === 'init') {
-                    if (contract.address === Assets.ONT) {
-                        const bookKeepers = [
-                            '1202021401156f187ec23ce631a489c3fa17f292171009c6c3162ef642406d3d09c74d',
-                            '1202021c6750d2c5d99813997438cee0740b04a73e42664c444e778e001196eed96c9d',
-                            '12020339541a43af2206358714cf6bd385fc9ac8b5df554fec5497d9e947d583f985fc',
-                            '120203bdf0d966f98ff4af5c563c4a3e2fe499d98542115e1ffd75fbca44b12c56a591'
-                        ];
-                        const totalSupply = 1000000000;
-                        const perBookKeeperSupply = totalSupply / bookKeepers.length;
-
-                        for (let i = 0; i < bookKeepers.length; i++) {
-                            const bookKeeperPubKey = bookKeepers[i];
-
-                            let address = core.getHash(bookKeeperPubKey);
-                            address = setCharAt(address, 0, '0');
-                            address = setCharAt(address, 1, '1');
-
-                            const transfer = {
-                                Id: transaction.Hash + '-' + i,
-                                Asset: contract.address,
-                                Value: perBookKeeperSupply,
-                                To: core.u160ToAddress(address),
-                                TxHash: transaction.Hash,
-                                BlockHash: transaction.BlockHash,
-                                BlockIndex: transaction.BlockIndex,
-                                Timestamp: transaction.Timestamp,
-                                Result: true
-                            };
-
-                            await changeBalance(address, contract.address, perBookKeeperSupply, transaction);
-                            await indexTransfer(transfer);
-                        }
-                    } else if (contract.address === Assets.ONG) {
-                        const totalSupply = 1000000000 * Math.pow(10, 9);
-                        await changeBalance(Assets.ONT, contract.address, totalSupply, transaction);
-                    }
-                }
-            } catch (e) {
-                console.log('Failed to process transaction', transaction.Hash);
+    if (transaction.Events !== null) {
+        for (let i = 0; i < transaction.Events.length; i++) {
+            const event = transaction.Events[i];
+            
+            if (event.CodeHash === Assets.ONT || event.CodeHash === Assets.ONG) {
+                await ingestTransfer(transaction, i, event);
+            } else if (event.CodeHash === Assets.ONT_ID || event.CodeHash === Assets.ONT_ID2) {
+                await ingestOntIdChange(transaction, i, event);
             }
+        }
+    }
+}
+
+async function ingestTransfer(transaction: Transaction, i: number, event: Event) {
+
+    const asset: string = event.CodeHash as string;
+    const from: string = event.States[1] as string;
+    const to: string = event.States[2] as string;
+    const value: number = Number(event.States[3]);
+
+    const transfer = {
+        Id: transaction.Hash + '-' + i,
+        Asset: asset,
+        Value: value,
+        From: from !== '0000000000000000000000000000000000000000' ? core.u160ToAddress(from) : undefined,
+        To: core.u160ToAddress(to),
+        TxHash: transaction.Hash,
+        BlockHash: transaction.BlockHash,
+        BlockIndex: transaction.BlockIndex,
+        Timestamp: transaction.Timestamp
+    };
+
+    if (transfer.From !== undefined) {
+        await changeBalance(from, asset, -Number(value), transaction);
+    }
+
+    await changeBalance(to, asset, Number(value), transaction);
+    await indexTransfer(transfer);
+}
+
+async function ingestOntIdChange(transaction: Transaction, i: number, event: Event ): Promise<void> {
+
+    const params: string[] = event.States[0] as string[];
+
+    const action: OntIdAction = params[0] as OntIdAction;
+    const ontId: string = params[2];
+
+    if (action === OntIdAction.Register) {
+        const operation: OntIdRegisterOperation = params[1] as OntIdRegisterOperation;
+
+        if (operation === OntIdRegisterOperation.register) {
+            console.log('Registering new ontId ', ontId);
+
+            const ontIdObject: OntId = {
+                Id: ontId,
+                RegistrationTxHash: transaction.Hash,
+                RegistrationTimestamp: transaction.Timestamp,
+                LastTxHash: transaction.Hash,
+                LastTimestamp: transaction.Timestamp,
+                Claims: [],
+                ClaimsCount: 0
+            };
+
+            await indexOntId(ontIdObject);
+        }
+    } else if (action === OntIdAction.Attribute) {
+        const operation: OntIdAttributeOperation = params[1] as OntIdAttributeOperation;
+
+        if (operation === OntIdAttributeOperation.add) {
+            console.log('Adding attribute to ontId ', ontId);
+
+            const attribute: string = params[3];
+
+            let ontIdObject = await getOntId(ontId);
+
+            ontIdObject = {
+                ...ontIdObject,
+                LastTxHash: transaction.Hash,
+                LastTimestamp: transaction.Timestamp,
+                Claims: [
+                    ...ontIdObject.Claims,
+                    {
+                        TxHash: transaction.Hash,
+                        Timestamp: transaction.Timestamp,
+                        Attribute: attribute
+                    }
+                ],
+                ClaimsCount: ontIdObject.ClaimsCount + 1
+            }
+
+            await indexOntId(ontIdObject);
         }
     }
 }
@@ -169,12 +197,16 @@ async function ingestTransfer(transaction: Transaction): Promise<void> {
 export async function recalculateAccounts(): Promise<void> {
     await initTransferMappings();
     await initAccountMappings();
+    await initOntIdMapping();
 
     const transactions = await getTransactions(0, 100000, 'Timestamp', 'ascending');
     console.log('Found ', transactions.count, ' transactions.');
 
-    for (let transaction of transactions.items) {
-        await ingestTransfer(transaction);
+    for (let i: number = 0; i < transactions.items.length; i++) {
+        let transaction = transactions.items[i];
+        console.log(i);
+        await ingestContract(transaction);
+        await indexTransaction(transaction);
     }
 }
 
@@ -186,7 +218,7 @@ export async function ingestBlock(block: BlockWrapper): Promise<void> {
         tx.BlockIndex = block.Header.Height;
         tx.Timestamp = block.Header.Timestamp;
 
-        await ingestTransfer(tx);
+        await ingestContract(tx);
         await indexTransaction(tx);
     }
 
@@ -206,10 +238,70 @@ function constructRequest(index: number): string {
     return JSON.stringify(request);
 }
 
+interface BlockResponse {
+    Action: string;
+    Desc: string;
+    Error: number;
+    Result: BlockWrapper;
+}
+
+class EventResponse {
+    Action: string;
+    Desc: string;
+    Error: number;
+    Result: Event[] | null;
+}
+
+function fixEventResponse(response: EventResponse) {
+    if (response.Result != null) {
+        for (let result of response.Result) {
+            if (Array.isArray(result.CodeHash)) {
+                result.CodeHash = utils.ab2hexstring(result.CodeHash);
+            }
+
+            if (result.CodeHash === Assets.ONT ||
+                result.CodeHash === Assets.ONG) {
+                if (Array.isArray(result.States[1])) {
+                    result.States[1] = utils.ab2hexstring(result.States[1]);
+                }
+
+                if (Array.isArray(result.States[2])) {
+                    result.States[2] = utils.ab2hexstring(result.States[2]);
+                }
+            } else if (result.CodeHash === Assets.ONT_ID || result.CodeHash === Assets.ONT_ID2) {
+
+                for (let state of result.States) {
+                    const params: string[] = state as string[];
+
+                    for(let i = 0; i < params.length; i++) {
+                        params[i] = utils.hexstr2str(params[i]);
+                    }
+                }
+            }
+
+            if (Array.isArray(result.TxHash)) {
+                result.TxHash = utils.ab2hexstring(result.TxHash);
+            }
+        }
+    }
+}
+
+async function fetchEvents(txHash: string): Promise<Event[]> {
+    const func = '/api/v1/smartcode/event/txhash/';
+    const url = `http://${CONST.TEST_NODE}:${CONST.HTTP_REST_PORT}${func}${txHash}`;
+
+    const response = await axios.get<EventResponse>(url);
+    const data = response.data;
+    fixEventResponse(data);
+    
+    return data.Result;
+}
+
 // function constructHeartBeat(): string {
 //     const request = {
 //         Action: 'heartbeat',
 //         Version: '1.0.0',
+//         id: '1',
 //         SubscribeJsonBlock: true,
 //         SubscribeRawBlock: true,
 //         SubscribeEvent: true,
@@ -219,12 +311,15 @@ function constructRequest(index: number): string {
 //     return JSON.stringify(request);
 // }
 
-interface WsResponse {
-    Action: string;
-    Desc: string;
-    Error: number;
-    Result: BlockWrapper;
-}
+// function constructTest(): string {
+//     const request = {
+//         Action: 'getsmartcodeeventbyhash',
+//         Version: '1.0.0',
+//         Hash: '45515b81017c34911e0bf0f4082d04fb8de2a5140311a1fc79867fa732009750'
+//     };
+
+//     return JSON.stringify(request);
+// }
 
 export async function ingestBlocks(): Promise<void> {
     const socket = CONST.TEST_ONT_URL.SOCKET_URL;
@@ -236,7 +331,6 @@ export async function ingestBlocks(): Promise<void> {
 
     ws.onopen = function open() {
         console.log('Websocket connected. Starting from ', last + 1);
-        // ws.send(constructHeartBeat());
         ws.send(constructRequest(last + 1));
     };
 
@@ -245,9 +339,9 @@ export async function ingestBlocks(): Promise<void> {
     };
 
     ws.onmessage = async function incoming(event: { data: string }) {
-        const response: WsResponse = JSON.parse(event.data.toString());
+        const response: BlockResponse = JSON.parse(event.data.toString());
         
-        if (response.Desc === 'SUCCESS') {
+        if (response.Desc == 'SUCCESS') {
             const block = response.Result;
             working = block.Header.Height;
             

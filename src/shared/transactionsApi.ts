@@ -22,7 +22,7 @@ import { Indices } from './elastic/model';
 import { Transaction } from './ont/model';
 import { Direction, Result } from '../common/gridTypes';
 
-export type SortColumn = 'TxType' | 'Hash' | 'Timestamp';
+export type SortColumn = 'TxType' | 'Hash' | 'Timestamp' | 'Result';
 
 export async function getBlockTransactions(
     BlockHash: string, 

@@ -73,13 +73,6 @@ const Transfers: React.SFC<Props> = (props) => (
                         >
                             <Link to={props.getColumnSortLink('Timestamp')}>Time</Link>
                         </Table.HeaderCell>
-                        <Table.HeaderCell
-                            sorted={props.sort === 'Result' ? props.order : undefined}
-                            selectable={true}
-                            width={1}
-                        >
-                            <Link to={props.getColumnSortLink('Result')}>Result</Link>
-                        </Table.HeaderCell>
                     </Table.Row>
                 </Table.Header>
                 <Table.Body>
@@ -91,7 +84,7 @@ const Transfers: React.SFC<Props> = (props) => (
                         </Table.Row>
                     ) : null}
                     {props.items.map(transfer => (
-                        <Table.Row key={transfer.Id} negative={!transfer.Result}>
+                        <Table.Row key={transfer.Id}>
                             <Table.Cell selectable={true}>
                                 <Link to={`/transfers/${transfer.Id}`}>{transfer.Value}</Link>
                             </Table.Cell>
@@ -115,11 +108,6 @@ const Transfers: React.SFC<Props> = (props) => (
                                     <Popup trigger={<span>{distanceInWordsToNow(transfer.Timestamp)}</span>}>
                                         {format(transfer.Timestamp, 'MMM Do YYYY HH:mm:ss')}
                                     </Popup>
-                                </Link>
-                            </Table.Cell>
-                            <Table.Cell selectable={true}>
-                                <Link to={`/transfers/${transfer.Id}`}>
-                                    {transfer.Result ? 'Success' : 'Failed'}
                                 </Link>
                             </Table.Cell>
                         </Table.Row>

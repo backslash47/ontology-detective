@@ -39,6 +39,12 @@ export const txMapping = {
         Timestamp: {
             type: 'long'
         },
+        Result: {
+            type: 'boolean'
+        },
+        Events: {
+            enabled: false
+        }
     }
 };
 
@@ -129,9 +135,41 @@ export const TransferMapping = {
         Timestamp: {
             type: 'long'
         },
-        Result: {
-            type: 'boolean'
-        }
+    }
+};
+
+export const ClaimMapping = {
+    properties: {
+        TxHash: {
+            type: 'keyword'
+        },
+        Timestamp: {
+            type: 'long'
+        },
+    }
+};
+
+export const OntIdMapping = {
+    properties: {
+        Id: {
+            type: 'keyword'
+        },
+        RegistrationTxHash: {
+            type: 'keyword'
+        },
+        RegistrationTimestamp: {
+            type: 'long'
+        },
+        LastTimestamp: {
+            type: 'long'
+        },
+        LastTxHash: {
+            type: 'keyword'
+        },
+        assets: {
+            type: 'nested',
+            ...ClaimMapping
+        },
     }
 };
 
@@ -139,5 +177,6 @@ export enum Indices {
     Tx = 'index_transaction',
     Transfer = 'index_transfer',
     Block = 'index_block',
-    Account = 'index_account'
+    Account = 'index_account',
+    OntId = 'index_ont_id'
 }
