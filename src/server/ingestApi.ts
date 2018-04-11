@@ -199,7 +199,7 @@ export async function recalculateAccounts(): Promise<void> {
     await initAccountMappings();
     await initOntIdMapping();
 
-    const transactions = await getTransactions(0, 100000, 'Timestamp', 'ascending');
+    const transactions = await getTransactions(0, 10000, 'Timestamp', 'ascending');
     console.log('Found ', transactions.count, ' transactions.');
 
     for (let i: number = 0; i < transactions.items.length; i++) {
