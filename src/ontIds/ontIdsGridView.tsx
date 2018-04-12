@@ -86,7 +86,7 @@ const OntIds: React.SFC<Props> = (props) => (
                                 </Link>
                             </Table.Cell>
                             <Table.Cell selectable={true}>
-                                <Link to={`/ont-ids/${ontId.LastTimestamp}`}>
+                                <Link to={`/ont-ids/${ontId.Id}`}>
                                     <Popup trigger={<span>{distanceInWordsToNow(ontId.LastTimestamp)}</span>}>
                                         {format(ontId.LastTimestamp, 'MMM Do YYYY HH:mm:ss')}
                                     </Popup>
