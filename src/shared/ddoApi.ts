@@ -1,7 +1,10 @@
 import { get } from 'lodash';
-import axios, { AxiosResponse } from 'axios';
-import { TransactionBuilder, OntidContract, CONST, DDO as OntDdo } from 'ont-sdk-ts';
+import { CONST, DDO as OntDdo, Transaction, RestClient } from 'ont-sdk-ts';
 import { DdoAttribute, Ddo, DdoClaim } from './ont/model';
+import { buildGetDDOTx as v1buildGetDDOTx } from './contracts/v1/txBuilder.v1';
+import { buildGetDDOTx as v2buildGetDDOTx } from './contracts/v2/txBuilder.v2';
+import v1deserializeDDO  from './contracts/v1/deserializer.v1';
+import v2deserializeDDO  from './contracts/v2/deserializer.v2';
 
 interface DdoResponse {
     Action: string;
@@ -14,8 +17,14 @@ function convertISODate(str: string): number {
     return Date.parse(str);
 }
 
-function parse(ddoStr: string): Ddo {
-    const ontDdo = OntDdo.deserialize(ddoStr);
+function parse(ddoStr: string, version?: string): Ddo {
+    let ontDdo: OntDdo;
+    if (version === '80e7d2fc22c24c466f44c7688569cc6e6d6c6f92') {
+        ontDdo = v1deserializeDDO(ddoStr);
+    } else {
+        ontDdo = v2deserializeDDO(ddoStr);
+    }
+
     const Attributes: DdoAttribute[] = [];
     const Claims: DdoClaim[] = [];
 
@@ -56,14 +65,22 @@ function parse(ddoStr: string): Ddo {
     };
 }
 
-export async function getDdo(ontId: string): Promise<Ddo> {
+export async function getDdo(ontId: string, version?: string): Promise<Ddo> {
     
-    let tx = OntidContract.buildGetDDOTx(ontId);
-    let param = TransactionBuilder.buildRestfulParam(tx);
+    let tx: Transaction;
 
-    const url = TransactionBuilder.sendRawTxRestfulUrl(CONST.TEST_ONT_URL.REST_URL, true);
+    if (version === '80e7d2fc22c24c466f44c7688569cc6e6d6c6f92') {
+        tx = v1buildGetDDOTx(ontId);
+    } else {
+        tx = v2buildGetDDOTx(ontId);
+    }
+
+    const client = new RestClient(CONST.TEST_ONT_URL.REST_URL);
+    const response: DdoResponse = await (client.sendRawTransaction(tx.serialize(), true) as Promise<DdoResponse>);
     
-    const res: AxiosResponse = await axios.post<DdoResponse>(url, param);
-    
-    return parse(res.data.Result[0]);
+    if (response.Result != null && response.Result.length > 0) {
+        return parse(response.Result[0], version);
+    } else {
+        throw new Error('Cant fetch ddo.');
+    }
 }

@@ -61,7 +61,7 @@ export default compose<PropsInner, PropsOuter>(
 
             // load ddo if possible
             try {
-                const ddo = await getDdo(this.props.id);
+                const ddo = await getDdo(this.props.id, ontId.CodeHash);
                 
                 this.props.setState({
                     ...this.props.state,

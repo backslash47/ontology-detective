@@ -170,6 +170,9 @@ export const OntIdMapping = {
             type: 'nested',
             ...ClaimMapping
         },
+        codeHash: {
+            type: 'keyword'
+        }
     }
 };
 

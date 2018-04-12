@@ -174,6 +174,7 @@ export type OntId = {
     LastTxHash: string;
     Claims: Claim[];            // it is not really claims but attributes
     ClaimsCount: number;
+    CodeHash: string;
 };
 
 export type DdoClaim = {

@@ -159,7 +159,8 @@ async function ingestOntIdChange(transaction: Transaction, i: number, event: Eve
                 LastTxHash: transaction.Hash,
                 LastTimestamp: transaction.Timestamp,
                 Claims: [],
-                ClaimsCount: 0
+                ClaimsCount: 0,
+                CodeHash: event.CodeHash.toString()
             };
 
             await indexOntId(ontIdObject);
@@ -363,12 +364,13 @@ export async function ingestBlocks(): Promise<void> {
     const ws = new ReconnectingWebSocket(socket, undefined, { constructor: Html5WebSocket });
 
     let lastBlock = await getLastBlock();
-    let last = 186162; // lastBlock ? lastBlock.Height : -1;
+    let last = lastBlock ? lastBlock.Height : -1; // 186162; 
     let working: number | null = null;
-    //const resp = await fetchEvents('473fdea5859f719814f05b67116252046369236799500bc4b698ff77994707ce');
-    //console.log(JSON.stringify(resp));
+    //  const resp = await fetchEvents('473fdea5859f719814f05b67116252046369236799500bc4b698ff77994707ce');
+    //  console.log(JSON.stringify(resp));
 
-    // const ddo = await getDdo('did:ont:TVgVkbY7edVEXjCG3dvTpooX4ZBNfZqjhn');
+    // const ddo = await getDdo('did:ont:THKWoVP247EHUNt8DFH3sj23TWGHvCYwFm', '8055b362904715fd84536e754868f4c8d27ca3f6');
+    // const ddo = await getDdo('did:ont:TVgVkbY7edVEXjCG3dvTpooX4ZBNfZqjhn', '80e7d2fc22c24c466f44c7688569cc6e6d6c6f92');
 
     const builder = new WebSocketClientApi();
     
