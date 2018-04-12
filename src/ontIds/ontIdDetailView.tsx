@@ -30,7 +30,7 @@ const OntIdView: React.SFC<Props> = (props) => (
         <Segment>
             <Header as="h2">
                 <Breadcrumb size="huge">
-                    <Breadcrumb.Section as={Link} to="/ont-ids">Ont Ids</Breadcrumb.Section>
+                    <Breadcrumb.Section as={Link} to="/ont-ids">ONT IDs</Breadcrumb.Section>
                     <Breadcrumb.Divider icon="right chevron" />
                     <Breadcrumb.Section active={true}>{props.id}</Breadcrumb.Section>
                 </Breadcrumb>

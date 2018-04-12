@@ -27,7 +27,7 @@ const OntIds: React.SFC<Props> = (props) => (
         <Segment>
             <Header as="h2">
                 <Breadcrumb size="huge">
-                    <Breadcrumb.Section active={true}>Ont Ids</Breadcrumb.Section>
+                    <Breadcrumb.Section active={true}>ONT IDs</Breadcrumb.Section>
                 </Breadcrumb>
             </Header>
         </Segment>
@@ -40,7 +40,7 @@ const OntIds: React.SFC<Props> = (props) => (
                             selectable={true}
                             width={9}
                         >
-                            <Link to={props.getColumnSortLink('Id')}>Ont Id</Link>
+                            <Link to={props.getColumnSortLink('Id')}>ONT ID</Link>
                         </Table.HeaderCell>
                         <Table.HeaderCell
                             sorted={props.sort === 'RegistrationTimestamp' ? props.order : undefined}

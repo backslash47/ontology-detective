@@ -368,11 +368,13 @@ export async function ingestBlocks(): Promise<void> {
     //const resp = await fetchEvents('473fdea5859f719814f05b67116252046369236799500bc4b698ff77994707ce');
     //console.log(JSON.stringify(resp));
 
+    // const ddo = await getDdo('did:ont:TVgVkbY7edVEXjCG3dvTpooX4ZBNfZqjhn');
+
     const builder = new WebSocketClientApi();
     
     ws.onopen = function open() {
         console.log('Websocket connected. Starting from ', last + 1);
-        ws.send(builder.getBlockJson(last + 1));
+        // ws.send(builder.getBlockJson(last + 1));
     };
 
     ws.onclose = function close(event: {}) {
