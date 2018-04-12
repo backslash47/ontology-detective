@@ -376,7 +376,7 @@ export async function ingestBlocks(): Promise<void> {
     
     ws.onopen = function open() {
         console.log('Websocket connected. Starting from ', last + 1);
-        // ws.send(builder.getBlockJson(last + 1));
+        ws.send(builder.getBlockJson(last + 1));
     };
 
     ws.onclose = function close(event: {}) {
