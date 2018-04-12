@@ -23,10 +23,10 @@ import { Segment, Table, Popup } from 'semantic-ui-react';
 import { Claim } from '~/shared/ont/model';
 
 type Props = {
-    claims: Claim[]
+    attributes: Claim[]
 };
 
-const OntIds: React.SFC<Props> = (props) => (
+const OntIdAttributes: React.SFC<Props> = (props) => (
     <Segment.Group>
         <Segment>
             <Table celled={false} basic="very" selectable={true} fixed={true}>
@@ -37,19 +37,19 @@ const OntIds: React.SFC<Props> = (props) => (
                     </Table.Row>
                 </Table.Header>
                 <Table.Body>
-                    {props.claims.map(claim => (
-                        <Table.Row>
+                    {props.attributes.map(attr => (
+                        <Table.Row key={attr.Attribute}>
                             <Table.Cell width={1}>
-                                <Link to={`/transactions/${claim.TxHash}`}>
+                                <Link to={`/transactions/${attr.TxHash}`}>
                                     <Popup 
-                                        trigger={<span>{distanceInWordsToNow(claim.Timestamp)}</span>}
+                                        trigger={<span>{distanceInWordsToNow(attr.Timestamp)}</span>}
                                     >
-                                        {format(claim.Timestamp, 'MMM Do YYYY HH:mm:ss')}
+                                        {format(attr.Timestamp, 'MMM Do YYYY HH:mm:ss')}
                                     </Popup>
                                 </Link>
                             </Table.Cell>
                             <Table.Cell width={1}>
-                                {claim.Attribute}
+                                {attr.Attribute}
                             </Table.Cell>
                         </Table.Row>
                     ))}
@@ -59,4 +59,4 @@ const OntIds: React.SFC<Props> = (props) => (
     </Segment.Group>
 );
 
-export default OntIds;
+export default OntIdAttributes;

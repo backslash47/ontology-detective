@@ -21,7 +21,9 @@ import { Link } from 'react-router-dom';
 import { Breadcrumb, Segment, Table, Header, Popup, Loader } from 'semantic-ui-react';
 import { distanceInWordsToNow, format } from 'date-fns';
 import { PropsInner as Props } from './ontIdDetail';
-import OntIdClaims from './ontIdClaims';
+import OntIdAttributes from './ontIdAttributes';
+import OntIdDdoAttributes from './ontIdDdoAttributes';
+import OntIdDdoClaims from './ontIdDdoClaims';
 
 const OntIdView: React.SFC<Props> = (props) => (
     <Segment.Group>
@@ -74,8 +76,22 @@ const OntIdView: React.SFC<Props> = (props) => (
         </Segment>
         {props.loaded && props.ontId.ClaimsCount > 0 ? (
             <Segment>
-                <Header as="h2">Claims</Header>
-                    <OntIdClaims claims={props.ontId.Claims}/>
+                <Header as="h2">Attributes</Header>
+                    <OntIdAttributes attributes={props.ontId.Claims}/>
+            </Segment>
+        ) : null}
+
+        {props.loaded && props.ddo !== undefined && props.ddo.Attributes.length > 0 ? (
+            <Segment>
+                <Header as="h2">DDO Attributes</Header>
+                    <OntIdDdoAttributes attributes={props.ddo.Attributes}/>
+            </Segment>
+        ) : null}
+
+        {props.loaded && props.ddo !== undefined && props.ddo.Claims.length > 0 ? (
+            <Segment>
+                <Header as="h2">DDO Claims</Header>
+                    <OntIdDdoClaims claims={props.ddo.Claims}/>
             </Segment>
         ) : null}
     </Segment.Group>

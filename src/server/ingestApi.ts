@@ -19,7 +19,6 @@
 import ReconnectingWebSocket from './ReconnectingWebsocket';
 import * as Html5WebSocket from 'html5-websocket';
 import { find, get } from 'lodash';
-import axios from 'axios';
 import { initAccountMappings, initTransferMappings, initOntIdMapping, initTxMappings } from '../shared/elastic/api';
 import { Account, TxType, Transaction, BlockWrapper, Event, OntId } from '../shared/ont/model';
 import { getAccount, indexAccount } from '../shared/accountsApi';
@@ -27,8 +26,9 @@ import { indexTransaction, getTransactions } from '../shared/transactionsApi';
 import { indexTransfer } from '../shared/transfersApi';
 import { indexBlock, getLastBlock } from '../shared/blocksApi';
 import { indexOntId, getOntId } from '../shared/ontIdApi';
+import { getDdo } from '../shared/ddoApi';
 
-import { Token, utils, core, CONST } from 'ont-sdk-ts';
+import { Token, utils, core, DDO, CONST, Wallet, scrypt, TransactionBuilder, TxSender, OntidContract, Claim, Metadata, WebSocketClientApi, RestClient } from 'ont-sdk-ts';
 import { Assets, OntIdAction, OntIdAttributeOperation, OntIdRegisterOperation } from '../const';
 import { sleep } from '../utils';
 
@@ -139,7 +139,7 @@ async function ingestTransfer(transaction: Transaction, i: number, event: Event)
     await indexTransfer(transfer);
 }
 
-async function ingestOntIdChange(transaction: Transaction, i: number, event: Event ): Promise<void> {
+async function ingestOntIdChange(transaction: Transaction, i: number, event: Event): Promise<void> {
 
     const params: string[] = event.States[0] as string[];
 
@@ -228,16 +228,6 @@ export async function ingestBlock(block: BlockWrapper): Promise<void> {
     await indexBlock(block.Header);
 }
 
-function constructRequest(index: number): string {
-    const request = {
-        Action: 'getblockbyheight',
-        Version: '1.0.0',
-        Height: index
-    };
-
-    return JSON.stringify(request);
-}
-
 interface BlockResponse {
     Action: string;
     Desc: string;
@@ -273,7 +263,7 @@ function fixEventResponse(response: EventResponse) {
                 for (let state of result.States) {
                     const params: string[] = state as string[];
 
-                    for(let i = 0; i < params.length; i++) {
+                    for (let i = 0; i < params.length; i++) {
                         params[i] = utils.hexstr2str(params[i]);
                     }
                 }
@@ -287,14 +277,61 @@ function fixEventResponse(response: EventResponse) {
 }
 
 async function fetchEvents(txHash: string): Promise<Event[]> {
-    const func = '/api/v1/smartcode/event/txhash/';
-    const url = `http://${CONST.TEST_NODE}:${CONST.HTTP_REST_PORT}${func}${txHash}`;
+    const client = new RestClient(CONST.TEST_ONT_URL.REST_URL);
+    const data = await client.getSmartCodeEvent(txHash);
 
-    const response = await axios.get<EventResponse>(url);
-    const data = response.data;
     fixEventResponse(data);
-    
     return data.Result;
+}
+
+export async function createOntId() {
+    const ontId = 'did:ont:THKWoVP247EHUNt8DFH3sj23TWGHvCYwFm';
+    const privateKey = 'ccd14ca73dd2043401cd598b249a282aa202b6a7bcdc1c8108c3befb3774acae';
+    
+    const tx = OntidContract.buildRegisterOntidTx(ontId, privateKey)
+    const param = TransactionBuilder.buildTxParam(tx);
+    console.log('sending: ', param);
+    
+    const txSender = new TxSender(CONST.TEST_ONT_URL.SOCKET_URL);
+    txSender.sendTxWithSocket(param, (res, socket) => {
+        console.log("receiving:", JSON.stringify(res));
+    });
+}
+
+export async function createOntClaim() {
+    const ontId = 'did:ont:THKWoVP247EHUNt8DFH3sj23TWGHvCYwFm';
+    const privateKey = 'ccd14ca73dd2043401cd598b249a282aa202b6a7bcdc1c8108c3befb3774acae';
+
+    const context = 'claim:standard0001';
+    const claimData = {
+        test: 'backslash'
+    };
+    
+    let date = (new Date()).toISOString()
+    if(date.indexOf('.') > -1) {
+        date = date.substring(0, date.indexOf('.')) + 'Z'
+    }
+    
+    const metadata = new Metadata();
+    metadata.CreateTime = date;
+    metadata.Issuer = ontId;
+    metadata.Subject = ontId;
+    
+    const claim = new Claim(context, claimData, metadata)
+    claim.sign(privateKey);
+    
+    const type = utils.str2hexstr('Json')
+    const value = utils.str2hexstr(JSON.stringify(claim));
+
+    const tx = OntidContract.buildAddAttributeTx(utils.str2hexstr('claim:' + claim.Id), value, type, ontId, privateKey);
+    const param = TransactionBuilder.buildTxParam(tx);
+    console.log('sending: ', param);
+    //send the transaction
+
+    const txSender = new TxSender(CONST.TEST_ONT_URL.SOCKET_URL);
+    txSender.sendTxWithSocket(param, (res, socket) => {
+        console.log("receiving:", JSON.stringify(res));
+    });
 }
 
 // function constructHeartBeat(): string {
@@ -315,7 +352,7 @@ async function fetchEvents(txHash: string): Promise<Event[]> {
 //     const request = {
 //         Action: 'getsmartcodeeventbyhash',
 //         Version: '1.0.0',
-//         Hash: '45515b81017c34911e0bf0f4082d04fb8de2a5140311a1fc79867fa732009750'
+//         Hash: '473fdea5859f719814f05b67116252046369236799500bc4b698ff77994707ce'
 //     };
 
 //     return JSON.stringify(request);
@@ -323,15 +360,19 @@ async function fetchEvents(txHash: string): Promise<Event[]> {
 
 export async function ingestBlocks(): Promise<void> {
     const socket = CONST.TEST_ONT_URL.SOCKET_URL;
-    const ws = new ReconnectingWebSocket(socket, undefined, {constructor: Html5WebSocket});
-    
-    let lastBlock = await getLastBlock();
-    let last = lastBlock ? lastBlock.Height : -1;
-    let working: number | null = null;
+    const ws = new ReconnectingWebSocket(socket, undefined, { constructor: Html5WebSocket });
 
+    let lastBlock = await getLastBlock();
+    let last = 186162; // lastBlock ? lastBlock.Height : -1;
+    let working: number | null = null;
+    //const resp = await fetchEvents('473fdea5859f719814f05b67116252046369236799500bc4b698ff77994707ce');
+    //console.log(JSON.stringify(resp));
+
+    const builder = new WebSocketClientApi();
+    
     ws.onopen = function open() {
         console.log('Websocket connected. Starting from ', last + 1);
-        ws.send(constructRequest(last + 1));
+        ws.send(builder.getBlockJson(last + 1));
     };
 
     ws.onclose = function close(event: {}) {
@@ -344,24 +385,24 @@ export async function ingestBlocks(): Promise<void> {
         if (response.Desc == 'SUCCESS') {
             const block = response.Result;
             working = block.Header.Height;
-            
+
             console.log('Ingesting block: ', working);
             await ingestBlock(block);
-            
+
             last = working;
-            ws.send(constructRequest(working + 1));
-            
+            ws.send(builder.getBlockJson(working + 1));
+
         } else if (response.Desc === 'UNKNOWN BLOCK') {
             console.log('No new block, waiting 3 seconds.');
             await sleep(3000);
-            ws.send(constructRequest(last + 1));
+            ws.send(builder.getBlockJson(last + 1));
 
         } else {
             console.log('Received error:', response);
         }
     };
 
-    ws.onerror = function(event) {
+    ws.onerror = function (event) {
         console.log(event);
     }
 }

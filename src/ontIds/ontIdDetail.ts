@@ -21,7 +21,8 @@ import { match } from 'react-router';
 import { Location } from 'history';
 import { StateSetter } from '~/utils';
 import { getOntId } from '~/shared/ontIdApi';
-import { OntId } from '~/shared/ont/model';
+import { getDdo } from '~/shared/ddoApi';
+import { OntId, Ddo } from '~/shared/ont/model';
 import View from './ontIdDetailView';
 
 interface PropsOuter {
@@ -35,6 +36,7 @@ interface PropsOwn {
 
 interface State {
     ontId: OntId;
+    ddo?: Ddo;
     loaded: boolean;
 }
 
@@ -56,6 +58,18 @@ export default compose<PropsInner, PropsOuter>(
                 ontId,
                 loaded: true
             });
+
+            // load ddo if possible
+            try {
+                const ddo = await getDdo(this.props.id);
+                
+                this.props.setState({
+                    ...this.props.state,
+                    ddo
+                });
+            } catch (e) {
+                console.log('Failed to load DDO', e);
+            }
         }
     }),
     flattenProp('state')

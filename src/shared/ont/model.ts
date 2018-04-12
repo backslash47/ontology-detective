@@ -172,6 +172,24 @@ export type OntId = {
     RegistrationTimestamp: number;
     LastTimestamp: number;
     LastTxHash: string;
-    Claims: Claim[];
+    Claims: Claim[];            // it is not really claims but attributes
     ClaimsCount: number;
+};
+
+export type DdoClaim = {
+    Id: string;
+    Issuer: string | null;
+    Timestamp: number | null;
+    Content: string | null;
+};
+
+export type DdoAttribute = {
+    Id: string;
+    Type: string;
+    Value: string;
+};
+
+export type Ddo = {
+    Attributes: DdoAttribute[];
+    Claims: DdoClaim[];
 };
