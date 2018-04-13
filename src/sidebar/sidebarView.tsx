@@ -41,6 +41,7 @@ const SidebarView: React.SFC<Props> = (props) => (
                 {props.items.map(item => (
                     <Menu.Item key={item.id} name={item.id} as={Link} to={item.link}>
                         {item.icon != null ? <Icon name={item.icon} /> : null}
+                        {item.customIcon != null ? <img className="icon" src={item.customIcon} /> : null}
                         {item.label}
                     </Menu.Item>
                 ))}
