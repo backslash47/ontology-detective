@@ -22,7 +22,7 @@ import { Indices } from './elastic/model';
 import { Account } from './ont/model';
 import { Direction, Result } from '../common/gridTypes';
 
-export type SortColumn = 'address' | 'firstTime' | 'lastTime' | 'transactionsCount';
+export type SortColumn = 'address' | 'firstTime' | 'lastTime' | 'transactionsCount' | 'ontBalance' | 'ongBalance';
 
 export async function getAccount(address: string): Promise<Account> {
     const client = getClient();

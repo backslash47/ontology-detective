@@ -19,10 +19,8 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
 import { distanceInWordsToNow, format } from 'date-fns';
-import { get, find } from 'lodash';
 import { Segment, Breadcrumb, Table, Button, Popup, Header, Loader } from 'semantic-ui-react';
 import { Props } from './accountsGrid';
-import { Assets } from '~/const';
 
 const Accounts: React.SFC<Props> = (props) => (
     <Segment.Group>
@@ -66,14 +64,18 @@ const Accounts: React.SFC<Props> = (props) => (
                             <Link to={props.getColumnSortLink('transactionsCount')}>Transfers</Link>
                         </Table.HeaderCell>
                         <Table.HeaderCell
+                            sorted={props.sort === 'ontBalance' ? props.order : undefined}
+                            selectable={true}
                             width={2}
                         >
-                            ONT
+                            <Link to={props.getColumnSortLink('ontBalance')}>ONT</Link>
                         </Table.HeaderCell>
                         <Table.HeaderCell
+                            sorted={props.sort === 'ongBalance' ? props.order : undefined}
+                            selectable={true}
                             width={2}
                         >
-                            ONG
+                            <Link to={props.getColumnSortLink('ongBalance')}>ONG</Link>
                         </Table.HeaderCell>
                     </Table.Row>
                 </Table.Header>
@@ -109,12 +111,12 @@ const Accounts: React.SFC<Props> = (props) => (
                             </Table.Cell>
                             <Table.Cell selectable={true}>
                                 <Link to={`/accounts/${account.address}`}>
-                                    {get(find(account.assets, a => a.asset === Assets.ONT), 'balance', 0)}
+                                    {account.ontBalance}
                                 </Link>
                             </Table.Cell>
                             <Table.Cell selectable={true}>
                                 <Link to={`/accounts/${account.address}`}>
-                                    {get(find(account.assets, a => a.asset === Assets.ONG), 'balance', 0)}
+                                    {account.ongBalance}
                                 </Link>
                             </Table.Cell>
                         </Table.Row>

@@ -20,7 +20,6 @@ import * as React from 'react';
 import { Link } from 'react-router-dom';
 import { Breadcrumb, Segment, Table, Header, Popup, Loader } from 'semantic-ui-react';
 import { distanceInWordsToNow, format } from 'date-fns';
-import { AssetIdToName } from '~/const';
 import { PropsInner as Props } from './accountDetail';
 import AccountTransfers from './accountTransfers';
 
@@ -80,12 +79,14 @@ const Transaction: React.SFC<Props> = (props) => (
                 <Header as="h2">Assets</Header>
                     <Table celled={false} basic="very" selectable={true} fixed={true}>
                         <Table.Body>
-                            {props.account.assets.map(assetBalance => (
-                                <Table.Row>
-                                    <Table.Cell width={1} >{AssetIdToName[assetBalance.asset]}</Table.Cell>
-                                    <Table.Cell width={1} className="bold">{assetBalance.balance}</Table.Cell>
-                                </Table.Row>
-                            ))}
+                            <Table.Row>
+                                <Table.Cell width={1}>ONT</Table.Cell>
+                                <Table.Cell width={1} className="bold">{props.account.ontBalance}</Table.Cell>
+                            </Table.Row>
+                            <Table.Row>
+                                <Table.Cell width={1}>ONG</Table.Cell>
+                                <Table.Cell width={1} className="bold">{props.account.ongBalance}</Table.Cell>
+                            </Table.Row>
                         </Table.Body>
                     </Table>
             </Segment>

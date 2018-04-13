@@ -37,6 +37,10 @@ const { Transfers, Contract } = Token;
 
 async function changeBalance(u160Address: string, assetAddress: string, value: number, transaction: Transaction) {
     let account: Account;
+
+    const ontBalance = assetAddress === Assets.ONT ? value : 0;
+    const ongBalance = assetAddress === Assets.ONG ? value : 0;
+
     try {
         const address = core.u160ToAddress(u160Address);
 
@@ -44,6 +48,8 @@ async function changeBalance(u160Address: string, assetAddress: string, value: n
         account.lastTx = transaction.Hash;
         account.lastTime = transaction.Timestamp;
         account.transactionsCount++;
+        account.ontBalance += ontBalance;
+        account.ongBalance += ongBalance;
 
         const assetBalance = find(account.assets, asset => asset.asset === assetAddress);
         if (assetBalance !== undefined) {
@@ -66,7 +72,9 @@ async function changeBalance(u160Address: string, assetAddress: string, value: n
             firstTime: transaction.Timestamp,
             lastTx: transaction.Hash,
             lastTime: transaction.Timestamp,
-            transactionsCount: 1
+            transactionsCount: 1,
+            ontBalance,
+            ongBalance
         };
     }
 

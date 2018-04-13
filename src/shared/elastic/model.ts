@@ -68,25 +68,10 @@ export const blockMapping = {
     }
 };
 
-export const assetBalanceMapping = {
-    properties: {
-        asset: {
-            type: 'keyword'
-        },
-        balance: {
-            type: 'double'
-        }
-    }
-};
-
 export const accountMapping = {
     properties: {
         address: {
             type: 'keyword'
-        },
-        assets: {
-            type: 'nested',
-            ...assetBalanceMapping
         },
         firstTime: {
             type: 'long'
@@ -103,6 +88,12 @@ export const accountMapping = {
         transactionsCount: {
             type: 'long'
         },
+        ontBalance: {
+            type: 'double'
+        },
+        ongBalance: {
+            type: 'double'
+        }
     }
 };
 

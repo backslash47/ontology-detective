@@ -126,20 +126,16 @@ export interface Sig {
     SigData: string[];
 }
 
-export type AssetBalance = {
-    asset: string;
-    balance: number;
-};
-
 export type Account = {
     address: string;
     u160Address: string,
-    assets: AssetBalance[];
     firstTime: number;
     firstTx: string;
     lastTime: number;
     lastTx: string;
     transactionsCount: number;
+    ontBalance: number;
+    ongBalance: number;
 };
 
 export type Transfer = {
