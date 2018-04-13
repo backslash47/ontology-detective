@@ -51,23 +51,10 @@ async function changeBalance(u160Address: string, assetAddress: string, value: n
         account.ontBalance += ontBalance;
         account.ongBalance += ongBalance;
 
-        const assetBalance = find(account.assets, asset => asset.asset === assetAddress);
-        if (assetBalance !== undefined) {
-            assetBalance.balance += value;
-        } else {
-            account.assets.push({
-                asset: assetAddress,
-                balance: value
-            });
-        }
     } catch (e) {
         account = {
             address: core.u160ToAddress(u160Address),
             u160Address,
-            assets: [{
-                asset: assetAddress,
-                balance: value
-            }],
             firstTx: transaction.Hash,
             firstTime: transaction.Timestamp,
             lastTx: transaction.Hash,
@@ -76,13 +63,6 @@ async function changeBalance(u160Address: string, assetAddress: string, value: n
             ontBalance,
             ongBalance
         };
-    }
-
-    for (let assetBalance of account.assets) {
-        if (assetBalance.balance < 0) {
-            //throw new Error('Incorrect transaction.');
-            console.log('Wrong balance on ', account.address);
-        }
     }
 
     await indexAccount(account);
