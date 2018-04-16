@@ -31,6 +31,33 @@ export async function getAccount(address: string): Promise<Account> {
     return response._source;
 }
 
+export async function getAccountsByIds(
+    addresses: string[],
+    from: number, 
+    size: number, 
+    sortColumn: SortColumn, 
+    direction: Direction
+): Promise<Result<Account>> {
+    const client = getClient();
+
+    const params: SearchParams = {
+        index: Indices.Account,
+        from,
+        size,
+        sort: `${sortColumn}:${direction === 'ascending' ? 'asc' : 'desc'}`,
+        body: {
+            query: {
+                ids : { values: addresses }
+            }
+        }
+    };
+
+    const response = await client.search<Account>(params);
+    const items = response.hits.hits.map(account => account._source);
+
+    return { items, count: response.hits.total };
+}
+
 export async function getAccounts(
     from: number, 
     size: number, 

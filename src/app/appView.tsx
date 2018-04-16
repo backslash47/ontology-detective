@@ -29,6 +29,9 @@ import AccountsGrid from '~/accounts/accountsGrid';
 import AccountDetail from '~/accounts/accountDetail';
 import OntIdsGrid from '~/ontIds/ontIdsGrid';
 import OntIdDetail from '~/ontIds/ontIdDetail';
+import Wallet from '~/wallet/wallet';
+import CreateWallet from '~/wallet/createWallet';
+import CreateClaim from '~/ontIds/createClaim';
 
 import Sidebar from '~/sidebar/sidebar';
 import Footer from '~/footer/footer';
@@ -48,6 +51,9 @@ const App: React.SFC<Props> = (props) => (
         <Route path="/accounts/:id" exact={true} component={AccountDetail} />
         <Route path="/ont-ids" exact={true} component={OntIdsGrid} />
         <Route path="/ont-ids/:id" exact={true} component={OntIdDetail} />
+        <Route path="/ont-ids/:id/create-claim" exact={true} component={CreateClaim} />
+        <Route path="/wallet" exact={true} component={Wallet} />
+        <Route path="/wallet/create" exact={true} component={CreateWallet} />
     </Sidebar>
   </Router>
 );

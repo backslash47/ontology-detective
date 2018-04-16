@@ -20,6 +20,7 @@ import { compose, lifecycle, withProps } from 'recompose';
 import { login as loginElastic } from '~/shared/elastic/api';
 import { Item } from '~/sidebar/sidebar';
 import AppView from './appView';
+const walletIcon = require('./wallet.svg');
 
 export interface PropsInner {
   menu: Item[];
@@ -61,6 +62,12 @@ const menu: Item[] = [
     label: 'ONT IDs',
     icon: 'id card',
     link: '/ont-ids'
+  },
+  {
+    id: 'wallet',
+    label: 'Wallet',
+    customIcon: walletIcon,
+    link: '/wallet'
   }
 ];
 

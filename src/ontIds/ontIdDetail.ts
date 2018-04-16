@@ -24,6 +24,7 @@ import { getOntId } from '~/shared/ontIdApi';
 import { getDdo } from '~/shared/ddoApi';
 import { OntId, Ddo } from '~/shared/ont/model';
 import View from './ontIdDetailView';
+import { isOwnIdentity } from '~/shared/walletApi';
 
 interface PropsOuter {
     match: match<{id: string}>;
@@ -36,6 +37,7 @@ interface PropsOwn {
 
 interface State {
     ontId: OntId;
+    own: boolean;
     ddo?: Ddo;
     loaded: boolean;
 }
@@ -48,14 +50,17 @@ export default compose<PropsInner, PropsOuter>(
         id: props.match.params.id
     })),
     withState<null, Partial<State>, 'state', 'setState'>('state', 'setState', {
-        loaded: false
+        loaded: false,
+        own: false
     }),
     lifecycle<PropsOwn & StateSetter<State>, null>({
         async componentDidMount() {
             const ontId = await getOntId(this.props.id);
+            const own = isOwnIdentity(ontId.Id);
             
             this.props.setState({
                 ontId,
+                own,
                 loaded: true
             });
 

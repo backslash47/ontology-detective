@@ -18,7 +18,7 @@
 
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { Breadcrumb, Segment, Table, Header, Popup, Loader } from 'semantic-ui-react';
+import { Breadcrumb, Segment, Table, Header, Popup, Loader, Button } from 'semantic-ui-react';
 import { distanceInWordsToNow, format } from 'date-fns';
 import { PropsInner as Props } from './ontIdDetail';
 import OntIdDdoAttributes from './ontIdDdoAttributes';
@@ -32,6 +32,9 @@ const OntIdView: React.SFC<Props> = (props) => (
                     <Breadcrumb.Section as={Link} to="/ont-ids">ONT IDs</Breadcrumb.Section>
                     <Breadcrumb.Divider icon="right chevron" />
                     <Breadcrumb.Section active={true}>{props.id}</Breadcrumb.Section>
+                    {props.own ? (
+                        <Breadcrumb.Section active={true} className="bold">&nbsp;(Own)</Breadcrumb.Section>
+                    ) : null}
                 </Breadcrumb>
             </Header>
         </Segment>
@@ -81,10 +84,13 @@ const OntIdView: React.SFC<Props> = (props) => (
             </Segment>
         ) : null}
 
-        {props.loaded && props.ddo !== undefined && props.ddo.Claims.length > 0 ? (
+        {props.loaded && props.ddo !== undefined && ((props.ddo.Claims.length > 0) || props.own)  ? (
             <Segment>
                 <Header as="h2">DDO Claims</Header>
-                    <OntIdDdoClaims claims={props.ddo.Claims}/>
+                {props.own ? (
+                    <Button as={Link} to={`/ont-ids/${props.ontId.Id}/create-claim`}>Add claim</Button>
+                ) : null}
+                <OntIdDdoClaims claims={props.ddo.Claims}/>
             </Segment>
         ) : null}
     </Segment.Group>

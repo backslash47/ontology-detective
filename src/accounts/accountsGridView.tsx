@@ -24,13 +24,15 @@ import { Props } from './accountsGrid';
 
 const Accounts: React.SFC<Props> = (props) => (
     <Segment.Group>
-        <Segment>
-            <Header as="h2">
-                <Breadcrumb size="huge">
-                    <Breadcrumb.Section active={true}>Accounts</Breadcrumb.Section>
-                </Breadcrumb>
-            </Header>
-        </Segment>
+        {!props.hideTitle ? (
+            <Segment>
+                <Header as="h2">
+                    <Breadcrumb size="huge">
+                        <Breadcrumb.Section active={true}>Accounts</Breadcrumb.Section>
+                    </Breadcrumb>
+                </Header>
+            </Segment>
+        ) : null}
         <Segment>
             <Table celled={false} basic="very" selectable={true} sortable={true} fixed={true}>
                 <Table.Header>

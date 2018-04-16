@@ -28,8 +28,6 @@ function parse(ddoStr: string, version?: string): Ddo {
     const Attributes: DdoAttribute[] = [];
     const Claims: DdoClaim[] = [];
 
-    console.log(JSON.stringify(ontDdo));
-
     ontDdo.attributes.forEach(ontAtr => {
         Attributes.push({
             Id: ontAtr.path,

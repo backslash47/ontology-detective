@@ -45,6 +45,34 @@ export async function getOntIds(
     return { items, count: response.hits.total };
 }
 
+export async function getOntIdsByIds(
+    ids: string[],
+    from: number, 
+    size: number,
+    sortColumn: SortColumn, 
+    direction: Direction
+): Promise<Result<OntId>> {
+    const client = getClient();
+    console.log('ids', ids);
+
+    const params: SearchParams = {
+        index: Indices.OntId,
+        from,
+        size,
+        sort: `${sortColumn}:${direction === 'ascending' ? 'asc' : 'desc'}`,
+        body: {
+            query: {
+                ids : { values: ids }
+            }
+        }
+    };
+
+    const response = await client.search<OntId>(params);
+    const items = response.hits.hits.map(transfer => transfer._source);
+
+    return { items, count: response.hits.total };
+}
+
 export async function getOntId(id: string): Promise<OntId> {
     const client = getClient();
 
