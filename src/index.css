@@ -20,6 +20,7 @@
 
 body {
     font-family: 'Source Sans Pro', sans-serif;
+    background-color: #f4f4f4;
 }
 
 .ui.table, .ui.header, .ui.table thead th {
@@ -39,7 +40,15 @@ body {
     height: 100%;
 }
 
-.ui.segment, .ui.segments, .ui.table, .ui.button, .ui.form input, .ui.tabular.menu .active.item { 
+.ui.segment, 
+.ui.segments, 
+.ui.table, 
+.ui.button, 
+.ui.form input,
+.ui.form textarea, 
+.ui.menu, 
+.ui.tabular.menu .active.item,
+.ui.message { 
     border-radius: 0 !important; 
     -moz-border-radius: 0 !important; 
     -webkit-border-radius: 0 !important; 
@@ -57,8 +66,16 @@ a, a:hover {
     color: #32a4be;
 }
 
+.ui.breadcrumb {
+    word-break: break-all;
+}
+
 .ui.breadcrumb a, .ui.breadcrumb a:hover {
     color: #32a4be;
+}
+
+.ui.breadcrumb .section {
+    display: inline;
 }
 
 .ui.breadcrumb .active.section {
@@ -75,4 +92,19 @@ a, a:hover {
 
 ._react-file-reader-input {
     display: inline;
+}
+
+img.icon {
+    width: 1.18em;
+    height: 1em;
+}
+
+@media only screen and (max-width: 767px) {
+    .ui.table:not(.unstackable) tr>td, .ui.table:not(.unstackable) tr>th {
+        padding: 0 !important;
+    }
+
+    .ui.table tbody tr td.selectable>a:not(.ui) {
+        padding: 0;
+    }
 }

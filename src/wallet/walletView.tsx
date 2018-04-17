@@ -84,9 +84,9 @@ const Wallet: React.SFC<Props> = (props) => (
                         send and receive ONT and ONG tokens without synchronizing the whole blockchain.
                     </p>
                 </Message>
-                <Button as={Link} to="/wallet/create">Create</Button>
+                <Button as={Link} to="/wallet/create" size="large">Create</Button>
                 <FileReaderInput onChange={props.handleOpen} as="text">
-                    <Button>Open</Button>
+                    <Button size="large">Open</Button>
                 </FileReaderInput>
             </Segment>
         ) : (

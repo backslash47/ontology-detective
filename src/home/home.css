@@ -17,7 +17,7 @@
  */
 
 .ui.grid.home {
-    height: calc(100vh - 130px);
+    height: calc(100vh - 180px);
     padding-left: 20%;
     padding-right: 20%;
 }

@@ -16,46 +16,31 @@
  * along with The ONT Detective.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-.sidebar {
-    height: 100%;
+
+.ui.inverted.menu {
+    background-color: #32a4be !important
 }
 
-.sidebar .pusher {
-    width: calc(100% - 150px)
+.ui.inverted.menu .menu {
+    background-color: #32a4be !important;
 }
 
-.sidebar .ui.inverted.menu {
-    background-color: #32a4be
+.ui.menu .ui.dropdown .menu.inverted>.item {
+    color: #fff !important;
 }
 
-
-.ui.vertical.sidebar.menu>.item.logo:first-child:before {
-    display: none !important;
+.ui.inverted.menu .item.logo img {
+    margin: auto;
 }
 
-.sidebar .pushable>.pusher {
-    height: 100%;
-    overflow-y: auto;
-}
-
-.ui.sidebar .ui.divider {
-    margin: 0;
-}
-
-.sidebar .ui.segment.main {
-    min-height: 100%;
-    padding-bottom: 100px;
-    margin-bottom: 0;
-    background-color: #f4f4f4
-}
-
-.sidebar .ui.segment.footer {
+.ui.segment.footer {
     height: 66px;
     margin-top: -66px;
     text-align: right;
-    background-color: #f4f4f4
 }
 
-.sidebar .ui.segment.pushable {
-    border: 0;
+.ui.basic.segment.main {
+    min-height: calc(100vh - 85px);
+    padding-bottom: 100px;
+    margin-bottom: 0;
 }

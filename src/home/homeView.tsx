@@ -39,12 +39,13 @@ const Home: React.SFC<Props> = (props: Props) => (
                         fluid={true}
                         icon="search"
                         placeholder="Search by block/tx/address hash or block index"
+                        size="large"
                     />
                     
                     <Message warning={true}>
                         Invalid account/block/transaction.
                     </Message>
-                    <Button className="search">Search</Button>
+                    <Button className="search" size="large">Search</Button>
                 </FinalForm>
                 {props.redirect != null ? (<Redirect to={props.redirect}/>) : null}
             </Grid.Column>

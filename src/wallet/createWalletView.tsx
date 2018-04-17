@@ -51,6 +51,7 @@ const CreateWallet: React.SFC<Props> = (props) => (
                         fluid={true} 
                         label="Name"
                         validate={props.handleValidateNotEmpty}
+                        size="large"
                     />
                     <Field
                         name="password" 
@@ -59,8 +60,9 @@ const CreateWallet: React.SFC<Props> = (props) => (
                         label="Password"
                         type="password"
                         validate={props.handleValidateNotEmpty}
+                        size="large"
                     />
-                    <Button>Create</Button>
+                    <Button size="large">Create</Button>
                 </FinalForm>
             )}
         </Segment>

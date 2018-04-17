@@ -30,8 +30,9 @@ const OntIdView: React.SFC<Props> = (props) => (
                 <Breadcrumb size="huge">
                     <Breadcrumb.Section as={Link} to="/ont-ids">ONT IDs</Breadcrumb.Section>
                     <Breadcrumb.Divider icon="right chevron" />
-                    <Breadcrumb.Section as={Link} to={`/ont-ids/${props.id}`}>{props.id}</Breadcrumb.Section>
-                    <Breadcrumb.Section active={true} className="bold">&nbsp;(Own)</Breadcrumb.Section>
+                    <Breadcrumb.Section as={Link} to={`/ont-ids/${props.id}`}>
+                        {props.id} &nbsp;(Own)
+                    </Breadcrumb.Section>
                     <Breadcrumb.Divider icon="right chevron" />
                     <Breadcrumb.Section active={true}>Create claim</Breadcrumb.Section>
                 </Breadcrumb>
@@ -56,6 +57,7 @@ const OntIdView: React.SFC<Props> = (props) => (
                         label="Password" 
                         type="password"
                         validate={props.handleValidateNotEmpty}
+                        size="large"
                     />
                     <Field 
                         name="context"
@@ -64,14 +66,16 @@ const OntIdView: React.SFC<Props> = (props) => (
                         label="Context" 
                         placeholder="claim:standard0001"
                         validate={props.handleValidateNotEmpty}
+                        size="large"
                     />
                     <Field 
                         name="content"
                         component={TextareaField}
                         label="Content"
                         validate={props.handleValidateJSon}
+                        style={{fontSize: '16px'}}
                     />
-                    <Button>Create</Button>
+                    <Button size="large">Create</Button>
                 </FinalForm>
             )}
         </Segment>

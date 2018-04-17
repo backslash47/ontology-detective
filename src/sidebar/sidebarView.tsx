@@ -17,46 +17,64 @@
  */
 
 import * as React from 'react';
-import { Sidebar, Segment, Menu, Icon, Divider } from 'semantic-ui-react';
+import { Segment, Menu, Icon, Responsive, Dropdown } from 'semantic-ui-react';
 import { Link } from 'react-router-dom';
 import './sidebar.css';
 import { PropsOuter as Props } from './sidebar';
-const logo = require('./ontlogo.png');
+const logo = require('./ontsymbol.png');
 
 const SidebarView: React.SFC<Props> = (props) => (
-    <div className="sidebar">
-        <Sidebar.Pushable as={Segment}>
-            <Sidebar
-                as={Menu}
-                width="thin"
-                visible={true}
-                icon="labeled"
-                vertical={true}
-                inverted={true}
-            >
-                <Menu.Item className="logo" as="a" href="http://ont.io/">
-                    <img src={logo} />
+    <div>
+        <Responsive
+            as={Menu}
+            maxWidth={767}
+            inverted={true}
+        >
+            <Menu.Item className="logo" as="a" href="http://ont.io/">
+                <img src={logo} />
+            </Menu.Item>
+            <Menu.Menu position="right">
+                <Dropdown item={true} icon={(<Icon name="sidebar" size="large"/>)}>
+                    <Dropdown.Menu className="inverted">
+                        {props.items.map(item => (
+                            <Dropdown.Item key={item.id} name={item.id} as={Link} to={item.link}>
+                                {item.icon != null ? <Icon name={item.icon} /> : null}
+                                {item.customIcon != null ? <Icon as="img" src={item.customIcon} /> : null}
+                                {item.label}
+                            </Dropdown.Item>
+                        ))}
+                    </Dropdown.Menu>
+                </Dropdown>
+            </Menu.Menu>
+        </Responsive>
+        <Responsive
+            as={Menu}
+            minWidth={768}
+            width="thin"
+            direction="top"
+            icon="labeled"
+            vertical={false}
+            inverted={true}
+        >
+            <Menu.Item className="logo" as="a" href="http://ont.io/">
+                <img src={logo} />
+            </Menu.Item>
+            {props.items.map(item => (
+                <Menu.Item key={item.id} name={item.id} as={Link} to={item.link}>
+                    {item.icon != null ? <Icon name={item.icon} /> : null}
+                    {item.customIcon != null ? <img className="icon" src={item.customIcon} /> : null}
+                    {item.label}
                 </Menu.Item>
-                <Divider />
-                {props.items.map(item => (
-                    <Menu.Item key={item.id} name={item.id} as={Link} to={item.link}>
-                        {item.icon != null ? <Icon name={item.icon} /> : null}
-                        {item.customIcon != null ? <img className="icon" src={item.customIcon} /> : null}
-                        {item.label}
-                    </Menu.Item>
-                ))}
-            </Sidebar>
-            <Sidebar.Pusher>
-                <Segment className="main" basic={true}>
-                    {props.children}
-                </Segment>
-                {props.footerComponent ? (
-                    <Segment basic={true} className="footer">
-                        <props.footerComponent/>
-                    </Segment>
-                ) : null}
-            </Sidebar.Pusher>
-        </Sidebar.Pushable>
+            ))}
+        </Responsive>
+        <Segment className="main" basic={true}>
+            {props.children}
+        </Segment>
+        {props.footerComponent ? (
+            <Segment basic={true} className="footer">
+                <props.footerComponent/>
+            </Segment>
+        ) : null}
     </div>
 );
 

@@ -88,7 +88,7 @@ const OntIdView: React.SFC<Props> = (props) => (
             <Segment>
                 <Header as="h2">DDO Claims</Header>
                 {props.own ? (
-                    <Button as={Link} to={`/ont-ids/${props.ontId.Id}/create-claim`}>Add claim</Button>
+                    <Button as={Link} to={`/ont-ids/${props.ontId.Id}/create-claim`} size="large">Add claim</Button>
                 ) : null}
                 <OntIdDdoClaims claims={props.ddo.Claims}/>
             </Segment>
