@@ -18,7 +18,9 @@
 
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { Breadcrumb, Segment, Header, Loader, Form, Message } from 'semantic-ui-react';
+import { Form as FinalForm, Field } from 'react-final-form';
+import { Breadcrumb, Segment, Header, Loader, Message, Button } from 'semantic-ui-react';
+import { InputField, TextareaField, Form } from '~/form/formWrapper';
 import { PropsInner as Props } from './createClaim';
 
 const OntIdView: React.SFC<Props> = (props) => (
@@ -46,26 +48,31 @@ const OntIdView: React.SFC<Props> = (props) => (
             {props.registering ? (
                 <Loader active={true} inline="centered">Asserting Claim on blockchain ...</Loader>
             ) : (
-                <Form warning={props.wrong !== null} onSubmit={props.handleCreate}>
-                    <Message warning={true}>{props.wrong}</Message>
-                    <Form.Input 
+                <FinalForm onSubmit={props.handleCreate} component={Form}>
+                    <Field
+                        name="password"
+                        component={InputField}
                         fluid={true} 
                         label="Password" 
                         type="password"
-                        onChange={props.handlePasswordChange} 
+                        validate={props.handleValidateNotEmpty}
                     />
-                    <Form.Input 
+                    <Field 
+                        name="context"
+                        component={InputField}
                         fluid={true} 
                         label="Context" 
-                        onChange={props.handleContextChange} 
                         placeholder="claim:standard0001"
+                        validate={props.handleValidateNotEmpty}
                     />
-                    <Form.TextArea 
+                    <Field 
+                        name="content"
+                        component={TextareaField}
                         label="Content"
-                        onChange={props.handleContentChange} 
+                        validate={props.handleValidateJSon}
                     />
-                    <Form.Button>Create</Form.Button>
-                </Form>
+                    <Button>Create</Button>
+                </FinalForm>
             )}
         </Segment>
     </Segment.Group>

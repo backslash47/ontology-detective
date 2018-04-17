@@ -17,11 +17,11 @@
  */
 
 import { compose, withState, withHandlers, flattenProp, withProps } from 'recompose';
+import { get } from 'lodash';
 import { RouterProps, match } from 'react-router';
 import { withRouter } from 'react-router-dom';
-import { InputOnChangeData, TextAreaProps } from 'semantic-ui-react';
 import { StateSetter } from '~/utils';
-import { registerSelfClaim, Errors } from '~/shared/walletApi';
+import { registerSelfClaim } from '~/shared/walletApi';
 import View from './createClaimView';
 
 interface PropsOuter {
@@ -33,18 +33,13 @@ interface PropsOwn {
 }
 
 interface State {
-    passwordInput: string;
-    contextInput: string;
-    contentInput: string;
     registering: boolean;
-    wrong: string | null;
 }
 
 interface Handlers {
-    handleCreate: () => void;
-    handlePasswordChange: (e: React.SyntheticEvent<HTMLInputElement>, data: InputOnChangeData) => void;
-    handleContextChange: (e: React.SyntheticEvent<HTMLInputElement>, data: InputOnChangeData) => void;
-    handleContentChange: (e: React.SyntheticEvent<HTMLTextAreaElement>, data: TextAreaProps) => void;
+    handleCreate: (values: object) => void;
+    handleValidateNotEmpty: (value: string) => boolean;
+    handleValidateJSon: (value: string) => boolean;
 }
 
 export interface PropsInner extends Handlers, State, PropsOwn, PropsOuter {
@@ -56,57 +51,20 @@ export default compose<PropsInner, PropsOuter>(
         id: props.match.params.id
     })),
     withState<null, Partial<State>, 'state', 'setState'>('state', 'setState', {
-        passwordInput: '',
-        contextInput: '',
-        contentInput: '',
-        registering: false,
-        wrong: null
+        registering: false
     }),
     withHandlers<PropsOuter & PropsOwn & StateSetter<State> & RouterProps, Handlers>({
-        handleCreate: (props) => async () => {
+        handleCreate: (props) => async (values) => {
             props.setState({
                 ...props.state,
-                registering: true,
-                wrong: null
+                registering: true
             });
 
-            const password = props.state.passwordInput;
-            const context = props.state.contextInput;
-            const content = props.state.contentInput;
-
-            if (password.trim().length === 0) {
-                props.setState({
-                    ...props.state,
-                    registering: false,
-                    wrong: 'Empty password.'
-                }); 
-
-                return;
-            }
-
-            if (context.trim().length === 0) {
-                props.setState({
-                    ...props.state,
-                    registering: false,
-                    wrong: 'Invalid context.'
-                }); 
-
-                return;
-            }
-
-            let contentJson;
-            try {
-                contentJson = JSON.parse(content);
-            } catch (e) {
-                props.setState({
-                    ...props.state,
-                    registering: false,
-                    wrong: 'Invalid JSON content.'
-                }); 
-
-                return;
-            }
-
+            const password = get(values, 'password');
+            const context = get(values, 'context');
+            const content = get(values, 'content');
+            const contentJson = JSON.parse(content);
+            
             try {
                 await registerSelfClaim(props.id, password, context, contentJson);
                 
@@ -116,30 +74,24 @@ export default compose<PropsInner, PropsOuter>(
                 });
 
                 props.history.push(`/ont-ids/${props.id}`);
+                return Promise.resolve({});
             } catch (e) {
-                if (e === Errors.WRONG_PASSWORD) {
-                    props.setState({
-                        ...props.state,
-                        registering: false,
-                        wrong: 'Invalid password.'
-                    }); 
-                }
+                props.setState({
+                    ...props.state,
+                    registering: false,
+                }); 
+
+                return Promise.resolve({ password: 'Invalid password.'});
             }
         },
-        handlePasswordChange: ({state, setState}) => (
-            e: React.SyntheticEvent<HTMLInputElement>, data: InputOnChangeData
-        ) => {
-            setState({...state, passwordInput: data.value !== undefined ? data.value : ''});
-        },
-        handleContextChange: ({state, setState}) => (
-            e: React.SyntheticEvent<HTMLInputElement>, data: InputOnChangeData
-        ) => {
-            setState({...state, contextInput: data.value !== undefined ? data.value : ''});
-        },
-        handleContentChange: ({state, setState}) => (
-            e: React.SyntheticEvent<HTMLTextAreaElement>, data: TextAreaProps
-        ) => {
-            setState({...state, contentInput: data.value !== undefined ? data.value.toString() : ''});
+        handleValidateNotEmpty: (props) => (value) => (value === undefined || value.trim().length === 0),
+        handleValidateJSon: (props) => (value) => {
+            try {
+                JSON.parse(value);
+                return false;
+            } catch (e) {
+                return true;
+            }
         }
     }),
     flattenProp('state'),

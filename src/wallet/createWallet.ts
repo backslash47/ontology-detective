@@ -17,9 +17,9 @@
  */
 
 import { compose, withState, withHandlers, flattenProp } from 'recompose';
+import { get } from 'lodash';
 import { RouterProps } from 'react-router';
 import { withRouter } from 'react-router-dom';
-import { InputOnChangeData } from 'semantic-ui-react';
 import { Wallet, scrypt } from 'ont-sdk-ts';
 import { StateSetter } from '~/utils';
 import { registerIdentity, saveWallet } from '~/shared/walletApi';
@@ -29,18 +29,16 @@ interface PropsOuter {
 }
 
 interface PropsOwn {
+    initialValues: object;
 }
 
 interface State {
-    nameInput: string;
-    passwordInput: string;
     registering: boolean;
 }
 
 interface Handlers {
-    handleCreate: () => void;
-    handleNameChange: (e: React.SyntheticEvent<HTMLInputElement>, data: InputOnChangeData) => void;
-    handlePasswordChange: (e: React.SyntheticEvent<HTMLInputElement>, data: InputOnChangeData) => void;
+    handleCreate: (values: object) => void;
+    handleValidateNotEmpty: (value: string) => boolean;
 }
 
 export interface PropsInner extends Handlers, State, PropsOwn, PropsOuter {
@@ -49,19 +47,17 @@ export interface PropsInner extends Handlers, State, PropsOwn, PropsOuter {
 export default compose<PropsInner, PropsOuter>(
     withRouter,
     withState<null, Partial<State>, 'state', 'setState'>('state', 'setState', {
-        nameInput: '',
-        passwordInput: '',
         registering: false
     }),
     withHandlers<StateSetter<State> & RouterProps, Handlers>({
-        handleCreate: (props) => async () => {
+        handleCreate: (props) => async (values) => {
             props.setState({
                 ...props.state,
                 registering: true
             });
 
-            const name = props.state.nameInput;
-            const password = props.state.passwordInput;
+            const name = get(values, 'name', '');
+            const password = get(values, 'password', '');
 
             const wallet = Wallet.createIdentityWallet(password, name);
             
@@ -80,16 +76,7 @@ export default compose<PropsInner, PropsOuter>(
 
             props.history.push('/wallet');
         },
-        handleNameChange: ({state, setState}) => (
-            e: React.SyntheticEvent<HTMLInputElement>, data: InputOnChangeData
-        ) => {
-            setState({...state, nameInput: data.value !== undefined ? data.value : ''});
-        },
-        handlePasswordChange: ({state, setState}) => (
-            e: React.SyntheticEvent<HTMLInputElement>, data: InputOnChangeData
-        ) => {
-            setState({...state, passwordInput: data.value !== undefined ? data.value : ''});
-        }
+        handleValidateNotEmpty: (props) => (value) => (value === undefined || value.trim().length === 0)
     }),
     flattenProp('state'),
 ) (View);

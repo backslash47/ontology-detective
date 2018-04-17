@@ -17,7 +17,7 @@
  */
 
 import { compose, withHandlers, withState, flattenProp } from 'recompose';
-import { InputOnChangeData } from 'semantic-ui-react';
+import { get } from 'lodash';
 import { getBlockByIndex, getBlock } from '~/shared/blocksApi';
 import { getTransaction } from '~/shared/transactionsApi';
 import { getAccount } from '~/shared/accountsApi';
@@ -38,13 +38,10 @@ function isBlockIndex(q: string): boolean {
 
 interface State {
     redirect?: string;
-    invalid?: boolean;
-    q: string;
 }
 
 interface Handlers {
-    handleSearch: () => void;
-    handleSearchChange: (e: React.SyntheticEvent<HTMLInputElement>, data: InputOnChangeData) => void;
+    handleSearch: (values: object) => void;
 }
 
 export interface PropsInner extends State, Handlers {
@@ -52,18 +49,17 @@ export interface PropsInner extends State, Handlers {
 
 export default compose<PropsInner, {}>(
     withState<null, State, 'state', 'setState'>('state', 'setState', {
-        q: ''
     }),
     withHandlers<StateSetter<State>, Handlers>({
-        handleSearch: ({state, setState}) => async () => {
-            let q = state.q.trim();
+        handleSearch: ({state, setState}) => async (values) => { 
+            let q = get(values, 'q').trim();
 
             if (isAddress(q)) {
                 try {
                     await getAccount(q);
                     setState({...state, redirect: `/accounts/${q}`});
                 } catch (e) {
-                    setState({...state, invalid: true});
+                    return Promise.resolve({q: 'Invalid address.'});
                 }
             } else if (isBlockOrTransaction(q)) {
                 if (q.length === 66) {
@@ -77,7 +73,7 @@ export default compose<PropsInner, {}>(
                         await getTransaction(q);
                         setState({...state, redirect: `/transactions/${q}`});
                     } catch (e) {
-                        setState({...state, invalid: true});    
+                        return Promise.resolve({q: 'Invalid block or transaction hash.'});
                     }
                 }  
             } else if (isBlockIndex(q)) { 
@@ -85,17 +81,14 @@ export default compose<PropsInner, {}>(
                     const block = await getBlockByIndex(Number(q));
                     setState({...state, redirect: `/blocks/${block.Hash}`});
                 } catch (e) {
-                    setState({...state, invalid: true});    
+                    return Promise.resolve({q: 'Invalid block index.'});
                 }
             } else {
-                setState({...state, invalid: true});
+                return Promise.resolve({q: 'Invalid search term.'});
             }
+
+            return Promise.resolve({});
         },
-        handleSearchChange: ({state, setState}) => (
-            e: React.SyntheticEvent<HTMLInputElement>, data: InputOnChangeData
-        ) => {
-            setState({...state, invalid: false, q: data.value !== undefined ? data.value : ''});
-        }
     }),
     flattenProp('state')
 )(View);

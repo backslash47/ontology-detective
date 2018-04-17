@@ -53,8 +53,7 @@ export async function getOntIdsByIds(
     direction: Direction
 ): Promise<Result<OntId>> {
     const client = getClient();
-    console.log('ids', ids);
-
+    
     const params: SearchParams = {
         index: Indices.OntId,
         from,

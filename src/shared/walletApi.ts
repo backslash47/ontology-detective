@@ -10,8 +10,8 @@ export enum Errors {
     WRONG_PASSWORD = 'Wrong password'
 }
 
-export function registerIdentity(ontId: string, privKey: string): Promise<string> {
-    return new Promise((resolve, reject) => {
+export async function registerIdentity(ontId: string, privKey: string): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
         const tx = OntidContract.buildRegisterOntidTx(ontId, privKey);
         const raw = builder.sendRawTransaction(tx.serialize());
 

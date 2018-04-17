@@ -18,7 +18,9 @@
 
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { Breadcrumb, Segment, Header, Form, Message, Loader } from 'semantic-ui-react';
+import { Form as FinalForm, Field } from 'react-final-form';
+import { Breadcrumb, Segment, Header, Message, Loader, Button } from 'semantic-ui-react';
+import { InputField, Form } from '~/form/formWrapper';
 import { PropsInner as Props } from './createWallet';
 
 const CreateWallet: React.SFC<Props> = (props) => (
@@ -42,20 +44,24 @@ const CreateWallet: React.SFC<Props> = (props) => (
             {props.registering ? (
                 <Loader active={true} inline="centered">Registering ONT ID on blockchain ...</Loader>
             ) : (
-                <Form onSubmit={props.handleCreate}>
-                    <Form.Input 
+                <FinalForm onSubmit={props.handleCreate} component={Form}>
+                    <Field
+                        name="name" 
+                        component={InputField} 
                         fluid={true} 
-                        label="Name" 
-                        onChange={props.handleNameChange} 
+                        label="Name"
+                        validate={props.handleValidateNotEmpty}
                     />
-                    <Form.Input 
+                    <Field
+                        name="password" 
+                        component={InputField} 
                         fluid={true} 
                         label="Password"
                         type="password"
-                        onChange={props.handlePasswordChange} 
+                        validate={props.handleValidateNotEmpty}
                     />
-                    <Form.Button>Create</Form.Button>
-                </Form>
+                    <Button>Create</Button>
+                </FinalForm>
             )}
         </Segment>
     </Segment.Group>
