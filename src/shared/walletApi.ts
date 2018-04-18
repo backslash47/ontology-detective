@@ -1,4 +1,16 @@
-import { OntidContract, WebSocketClientApi, CONST, Wallet, Metadata, Claim, utils, scrypt } from 'ont-sdk-ts';
+import { 
+    OntidContract, 
+    WebSocketClientApi, 
+    CONST, 
+    Wallet, 
+    Metadata, 
+    Claim, 
+    utils, 
+    scrypt, 
+    Account, 
+    core, 
+    TransactionBuilder
+} from 'ont-sdk-ts';
 import { get, find } from 'lodash';
 import TxSender from './txSender';
 
@@ -8,6 +20,93 @@ export enum Errors {
     NOT_SIGNED_IN = 'Not signed in',
     IDENTITY_NOT_FOUND = 'Identity not found',
     WRONG_PASSWORD = 'Wrong password'
+}
+
+export function createAccount(label: string, password: string): Account {
+    const wallet = loadWallet();
+
+    if (wallet !== null) {
+        // check password
+        if (wallet.defaultOntid !== undefined) {
+            const identity = find(wallet.identities, ident => ident.ontid === wallet.defaultOntid);
+
+            if (identity !== undefined) {
+                try {
+                    const encryptedPrivateKey = identity.controls[0].key;
+                    scrypt.decrypt(encryptedPrivateKey, password);
+                } catch (e) {
+                    throw new Error(Errors.WRONG_PASSWORD);        
+                }
+            }
+        }
+
+        const account = new Account();
+        const privateKey = core.generatePrivateKeyStr();
+        account.create(privateKey, password, label);
+
+        wallet.addAccount(account);
+        if (wallet.defaultAccountAddress === '') {
+            wallet.setDefaultAccount(account.address);
+        }
+
+        saveWallet(wallet.toJson());
+
+        return account;
+    } else {
+        throw new Error(Errors.NOT_SIGNED_IN);
+    }
+}
+
+export async function transferAsset(
+    from: string, 
+    to: string, 
+    password: string, 
+    amount: number
+): Promise<void> {
+    const wallet = loadWallet();
+
+    if (wallet !== null) {
+        const account = find(wallet.accounts, a => a.address === from);
+        
+        if (account !== undefined) {
+
+            try {
+                const encryptedPrivateKey = account.key;
+                const privateKey = scrypt.decrypt(encryptedPrivateKey, password);
+
+                return new Promise<void>((resolve, reject) => {
+                    const tx = TransactionBuilder.makeTransferTransaction(
+                        'ONT', 
+                        core.addressToU160(from), 
+                        core.addressToU160(to), 
+                        amount.toString(), 
+                        privateKey
+                    );
+                    const raw = builder.sendRawTransaction(tx.serialize());
+                    
+                    const txSender = new TxSender(CONST.TEST_ONT_URL.SOCKET_URL);
+                    txSender.sendTxWithSocket(raw, (err, res, socket) => {
+                        if (err !== null) {
+                            reject(err);
+                        } else if (
+                            get(res, 'Action') === 'InvokeTransaction' && 
+                            get(res, 'Desc') === 'SUCCESS' &&
+                            socket !== null
+                        ) {
+                            socket.close();
+                            resolve();
+                        }
+                    });
+                }); 
+            } catch (e) {
+                return Promise.reject(Errors.WRONG_PASSWORD);        
+            }
+        } else {
+            return Promise.reject(Errors.IDENTITY_NOT_FOUND);
+        }
+    } else {
+        return Promise.reject(Errors.NOT_SIGNED_IN);
+    }
 }
 
 export async function registerIdentity(ontId: string, privKey: string): Promise<string> {
@@ -134,6 +233,16 @@ export function isOwnIdentity(ontId: string): boolean {
 
     if (wallet !== null) {
         return wallet.identities.map(i => i.ontid).includes(ontId);
+    }
+
+    return false;
+}
+
+export function isOwnAccount(address: string): boolean {
+    const wallet = loadWallet();
+
+    if (wallet !== null) {
+        return wallet.accounts.map(a => a.address).includes(address);
     }
 
     return false;

@@ -91,36 +91,49 @@ const Accounts: React.SFC<Props> = (props) => (
                     ) : null}
                     {props.items.map(account => (
                         <Table.Row key={account.address}>
-                            <Table.Cell selectable={true}>
-                                <Link to={`/accounts/${account.address}`}>{account.address}</Link>
-                            </Table.Cell>
-                            <Table.Cell selectable={true}>
-                                <Link to={`/accounts/${account.address}`}>
-                                    <Popup trigger={<span>{distanceInWordsToNow(account.firstTime)}</span>}>
-                                        {format(account.firstTime, 'MMM Do YYYY HH:mm:ss')}
-                                    </Popup>
-                                </Link>
-                            </Table.Cell>
-                            <Table.Cell selectable={true}>
-                                <Link to={`/accounts/${account.address}`}>
-                                    <Popup trigger={<span>{distanceInWordsToNow(account.lastTime)}</span>}>
-                                        {format(account.lastTime, 'MMM Do YYYY HH:mm:ss')}
-                                    </Popup>
-                                </Link>
-                            </Table.Cell>
-                            <Table.Cell selectable={true}>
-                                <Link to={`/accounts/${account.address}`}>{account.transactionsCount}</Link>
-                            </Table.Cell>
-                            <Table.Cell selectable={true}>
-                                <Link to={`/accounts/${account.address}`}>
-                                    {account.ontBalance}
-                                </Link>
-                            </Table.Cell>
-                            <Table.Cell selectable={true}>
-                                <Link to={`/accounts/${account.address}`}>
-                                    {account.ongBalance}
-                                </Link>
-                            </Table.Cell>
+                            {account.firstTime !== undefined && account.lastTime !== undefined ? (
+                                <>
+                                    <Table.Cell selectable={true}>
+                                        <Link to={`/accounts/${account.address}`}>{account.address}</Link>
+                                    </Table.Cell>
+                                    <Table.Cell selectable={true}>
+                                        <Link to={`/accounts/${account.address}`}>
+                                            <Popup trigger={<span>{distanceInWordsToNow(account.firstTime)}</span>}>
+                                                {format(account.firstTime, 'MMM Do YYYY HH:mm:ss')}
+                                            </Popup>
+                                        </Link>
+                                    </Table.Cell>
+                                    <Table.Cell selectable={true}>
+                                        <Link to={`/accounts/${account.address}`}>
+                                            <Popup trigger={<span>{distanceInWordsToNow(account.lastTime)}</span>}>
+                                                {format(account.lastTime, 'MMM Do YYYY HH:mm:ss')}
+                                            </Popup>
+                                        </Link>
+                                    </Table.Cell>
+                                    <Table.Cell selectable={true}>
+                                        <Link to={`/accounts/${account.address}`}>{account.transactionsCount}</Link>
+                                    </Table.Cell>
+                                    <Table.Cell selectable={true}>
+                                        <Link to={`/accounts/${account.address}`}>
+                                            {account.ontBalance}
+                                        </Link>
+                                    </Table.Cell>
+                                    <Table.Cell selectable={true}>
+                                        <Link to={`/accounts/${account.address}`}>
+                                            {account.ongBalance}
+                                        </Link>
+                                    </Table.Cell>
+                                </>
+                            ) : (
+                                <>
+                                    <Table.Cell>{account.address}</Table.Cell>
+                                    <Table.Cell/>
+                                    <Table.Cell/>
+                                    <Table.Cell>{account.transactionsCount}</Table.Cell>
+                                    <Table.Cell>{account.ontBalance}</Table.Cell>
+                                    <Table.Cell>{account.ongBalance}</Table.Cell>
+                                </>
+                            )}
                         </Table.Row>
                     ))}
                 </Table.Body>

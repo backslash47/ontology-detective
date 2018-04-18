@@ -23,6 +23,7 @@ import { StateSetter } from '~/utils';
 import { getAccount } from '~/shared/accountsApi';
 import { Account } from '~/shared/ont/model';
 import View from './accountDetailView';
+import { isOwnAccount } from '~/shared/walletApi';
 
 interface PropsOuter {
     match: match<{id: string}>;
@@ -35,6 +36,7 @@ interface PropsOwn {
 
 interface State {
     account: Account;
+    own: boolean;
     loaded: boolean;
 }
 
@@ -46,14 +48,17 @@ export default compose<PropsInner, PropsOuter>(
         accountId: props.match.params.id
     })),
     withState<null, Partial<State>, 'state', 'setState'>('state', 'setState', {
-        loaded: false
+        loaded: false,
+        own: false
     }),
     lifecycle<PropsOwn & StateSetter<State>, null>({
         async componentDidMount() {
             const account = await getAccount(this.props.accountId);
+            const own = isOwnAccount(account.address);
             
             this.props.setState({
                 account,
+                own,
                 loaded: true
             });
         }

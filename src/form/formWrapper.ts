@@ -40,6 +40,7 @@
  export const FormWrapper = compose<FormProps, FormRenderProps>(
     mapProps<FormProps, FormRenderProps>((outer) => ({
         onSubmit: outer.handleSubmit,
+        error: outer.submitFailed,
         children: get(outer, 'children')
     }))
  );

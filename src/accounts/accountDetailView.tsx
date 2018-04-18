@@ -18,7 +18,7 @@
 
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { Breadcrumb, Segment, Table, Header, Popup, Loader } from 'semantic-ui-react';
+import { Breadcrumb, Segment, Table, Header, Popup, Loader, Button } from 'semantic-ui-react';
 import { distanceInWordsToNow, format } from 'date-fns';
 import { PropsInner as Props } from './accountDetail';
 import AccountTransfers from './accountTransfers';
@@ -31,6 +31,9 @@ const Transaction: React.SFC<Props> = (props) => (
                     <Breadcrumb.Section as={Link} to="/accounts">Accounts</Breadcrumb.Section>
                     <Breadcrumb.Divider icon="right chevron" />
                     <Breadcrumb.Section active={true}>{props.accountId}</Breadcrumb.Section>
+                    {props.own ? (
+                        <Breadcrumb.Section active={true} className="bold">&nbsp;(Own)</Breadcrumb.Section>
+                    ) : null}
                 </Breadcrumb>
             </Header>
         </Segment>
@@ -49,21 +52,30 @@ const Transaction: React.SFC<Props> = (props) => (
                         <Table.Row>
                             <Table.Cell width={1}>Created</Table.Cell>
                             <Table.Cell width={1}>
-                                <Link to={`/transactions/${props.account.firstTx}`}>
-                                    <Popup trigger={<span>{distanceInWordsToNow(props.account.firstTime)}</span>}>
-                                        {format(props.account.firstTime, 'MMM Do YYYY HH:mm:ss')}
-                                    </Popup>
-                                </Link>
+                                {props.account.firstTime !== undefined ? (
+                                    <Link to={`/transactions/${props.account.firstTx}`}>
+                                        <Popup trigger={<span>{distanceInWordsToNow(props.account.firstTime)}</span>}>
+                                            {format(props.account.firstTime, 'MMM Do YYYY HH:mm:ss')}
+                                        </Popup>
+                                    </Link>
+                                ) : (
+                                    <>new</>
+                                )}
+                                
                             </Table.Cell>
                         </Table.Row>
                         <Table.Row>
                             <Table.Cell width={1}>Last transaction</Table.Cell>
                             <Table.Cell width={1}>
+                            {props.account.lastTime !== undefined ? (
                                 <Link to={`/transactions/${props.account.lastTx}`}>
                                     <Popup trigger={<span>{distanceInWordsToNow(props.account.lastTime)}</span>}>
                                         {format(props.account.lastTime, 'MMM Do YYYY HH:mm:ss')}
                                     </Popup>
                                 </Link>
+                            ) : (
+                                <>new</>
+                            )}
                             </Table.Cell>
                         </Table.Row>
                         <Table.Row>
@@ -77,6 +89,15 @@ const Transaction: React.SFC<Props> = (props) => (
         {props.loaded ? (
             <Segment>
                 <Header as="h2">Assets</Header>
+                    {props.own ? (
+                        <Button 
+                            as={Link} 
+                            to={`/accounts/${props.account.address}/transfer`} 
+                            size="large"
+                        >
+                            Transfer
+                        </Button>
+                    ) : null}
                     <Table celled={false} basic="very" selectable={true} fixed={true}>
                         <Table.Body>
                             <Table.Row>

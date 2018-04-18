@@ -65,6 +65,7 @@ body {
 .ui.form textarea, 
 .ui.menu, 
 .ui.tabular.menu .active.item,
+.ui.dropdown,
 .ui.dropdown .menu,
 .ui.message { 
     border-radius: 0 !important; 

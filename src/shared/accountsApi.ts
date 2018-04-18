@@ -17,6 +17,8 @@
  */
 
 import { SearchParams } from 'elasticsearch';
+import { core } from 'ont-sdk-ts';
+import { concat } from 'lodash';
 import { getClient } from './elastic/api';
 import { Indices } from './elastic/model';
 import { Account } from './ont/model';
@@ -31,12 +33,34 @@ export async function getAccount(address: string): Promise<Account> {
     return response._source;
 }
 
+export async function getMissingAccountIds(
+    addresses: string[]
+): Promise<string[]> {
+    const client = getClient();
+
+    const params: SearchParams = {
+        index: Indices.Account,
+        size: 10000,
+        _sourceInclude: ['address'],
+        body: {
+            query: {
+                ids : { values: addresses }
+            }
+        }
+    };
+
+    const response = await client.search<{address: string}>(params);
+    const items = response.hits.hits.map(account => account._source.address);
+    
+    return addresses.filter(address => !items.includes(address));
+}
+
 export async function getAccountsByIds(
     addresses: string[],
     from: number, 
     size: number, 
     sortColumn: SortColumn, 
-    direction: Direction
+    direction: Direction,
 ): Promise<Result<Account>> {
     const client = getClient();
 
@@ -55,7 +79,19 @@ export async function getAccountsByIds(
     const response = await client.search<Account>(params);
     const items = response.hits.hits.map(account => account._source);
 
-    return { items, count: response.hits.total };
+    const missingAddresses = await getMissingAccountIds(addresses);
+
+    const missingAccounts: Account[] = missingAddresses.map(address => ({
+        address,
+        u160Address: core.addressToU160(address),
+        transactionsCount: 0,
+        ontBalance: 0,
+        ongBalance: 0
+    }));
+
+    const allAccounts = concat<Account>(missingAccounts, items);
+
+    return { items: allAccounts, count: response.hits.total };
 }
 
 export async function getAccounts(

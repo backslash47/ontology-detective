@@ -129,10 +129,10 @@ export interface Sig {
 export type Account = {
     address: string;
     u160Address: string,
-    firstTime: number;
-    firstTx: string;
-    lastTime: number;
-    lastTx: string;
+    firstTime?: number;
+    firstTx?: string;
+    lastTime?: number;
+    lastTx?: string;
     transactionsCount: number;
     ontBalance: number;
     ongBalance: number;
