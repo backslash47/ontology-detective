@@ -48,6 +48,7 @@ body {
 .ui.form textarea, 
 .ui.menu, 
 .ui.tabular.menu .active.item,
+.ui.dropdown .menu,
 .ui.message { 
     border-radius: 0 !important; 
     -moz-border-radius: 0 !important; 
