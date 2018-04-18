@@ -35,27 +35,30 @@ import CreateAccount from '~/wallet/createAccount';
 import CreateClaim from '~/ontIds/createClaim';
 import Transfer from '~/accounts/transfer';
 import Layout from '~/layout/layoutView';
+import Analytics from 'react-router-ga';
 
 const App: React.SFC<{}> = () => (
   <Router>
-    <Layout>
-        <Route path="/" exact={true} component={Home} />
-        <Route path="/blocks" exact={true} component={BlocksGrid} />
-        <Route path="/blocks/:id" exact={true} component={BlockDetail} />
-        <Route path="/transactions/" exact={true} component={TransactionsGrid} />
-        <Route path="/transactions/:id" exact={true} component={TransactionDetail} />
-        <Route path="/transfers/" exact={true} component={TransfersGrid} />
-        <Route path="/transfers/:id" exact={true} component={TransferDetail} />
-        <Route path="/accounts" exact={true} component={AccountsGrid} />
-        <Route path="/accounts/:id" exact={true} component={AccountDetail} />
-        <Route path="/accounts/:id/transfer" exact={true} component={Transfer} />
-        <Route path="/ont-ids" exact={true} component={OntIdsGrid} />
-        <Route path="/ont-ids/:id" exact={true} component={OntIdDetail} />
-        <Route path="/ont-ids/:id/create-claim" exact={true} component={CreateClaim} />
-        <Route path="/wallet" exact={true} component={Wallet} />
-        <Route path="/wallet/create" exact={true} component={CreateWallet} />
-        <Route path="/wallet/create-account" exact={true} component={CreateAccount} />
-    </Layout>
+    <Analytics id="UA-117874562-1">
+      <Layout>
+          <Route path="/" exact={true} component={Home} />
+          <Route path="/blocks" exact={true} component={BlocksGrid} />
+          <Route path="/blocks/:id" exact={true} component={BlockDetail} />
+          <Route path="/transactions/" exact={true} component={TransactionsGrid} />
+          <Route path="/transactions/:id" exact={true} component={TransactionDetail} />
+          <Route path="/transfers/" exact={true} component={TransfersGrid} />
+          <Route path="/transfers/:id" exact={true} component={TransferDetail} />
+          <Route path="/accounts" exact={true} component={AccountsGrid} />
+          <Route path="/accounts/:id" exact={true} component={AccountDetail} />
+          <Route path="/accounts/:id/transfer" exact={true} component={Transfer} />
+          <Route path="/ont-ids" exact={true} component={OntIdsGrid} />
+          <Route path="/ont-ids/:id" exact={true} component={OntIdDetail} />
+          <Route path="/ont-ids/:id/create-claim" exact={true} component={CreateClaim} />
+          <Route path="/wallet" exact={true} component={Wallet} />
+          <Route path="/wallet/create" exact={true} component={CreateWallet} />
+          <Route path="/wallet/create-account" exact={true} component={CreateAccount} />
+      </Layout>
+    </Analytics>
   </Router>
 );
 

@@ -23,7 +23,8 @@
     "noUnusedLocals": true
   },
   "include": [
-    "./src/index.tsx"
+    "./src/index.tsx",
+    "./src/global.d.ts"
   ],
   "exclude": [
     "node_modules",

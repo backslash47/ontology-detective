@@ -18,3 +18,4 @@
 
 declare module "node-fetch";
 declare module "html5-websocket";
+declare module "react-router-ga";
