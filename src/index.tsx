@@ -18,9 +18,12 @@
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import App from '~/app/app';
+import App from '~/app/appView';
+import { login as loginElastic } from '~/shared/elastic/api';
 import 'semantic-ui-css/semantic.min.css';
 import './index.css';
+
+loginElastic(process.env.REACT_APP_API_URL || 'http://localhost:9200');
 
 ReactDOM.render(
   <App />,

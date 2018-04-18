@@ -21,6 +21,27 @@
 body {
     font-family: 'Source Sans Pro', sans-serif;
     background-color: #f4f4f4;
+    display: flex;
+    flex-direction: column;
+}
+
+#root {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.ui.menu.ont-header {
+    min-height: 70px;
+    margin-bottom: 0;
+}
+
+.ui.segment.ont-main {
+    flex-grow: 1;
+}
+
+.ui.segment.ont-footer {
+    text-align: right;
 }
 
 .ui.table, .ui.header, .ui.table thead th {
@@ -34,10 +55,6 @@ body {
 .ui.header {
     font-family: 'Source Sans Pro', sans-serif;
     font-weight: normal;
-}
-
-#root {
-    height: 100%;
 }
 
 .ui.segment, 
@@ -63,19 +80,12 @@ body {
     background-color: white;
 }
 
-a, a:hover {
-    color: #32a4be;
-}
-
-.ui.breadcrumb {
-    word-break: break-all;
-}
-
-.ui.breadcrumb a, .ui.breadcrumb a:hover {
+a, a:hover, .ui.breadcrumb a, .ui.breadcrumb a:hover {
     color: #32a4be;
 }
 
 .ui.breadcrumb .section {
+    word-break: break-all;
     display: inline;
 }
 
@@ -108,4 +118,16 @@ img.icon {
     .ui.table tbody tr td.selectable>a:not(.ui) {
         padding: 0;
     }
+}
+
+.menu.inverted {
+    background-color: #32a4be !important;
+}
+
+.ui.menu .ui.dropdown .menu.inverted>.item {
+    color: #fff !important;
+}
+
+.ui.inverted.menu .item.logo img {
+    margin: auto;
 }

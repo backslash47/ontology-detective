@@ -17,18 +17,71 @@
  */
 
 import * as React from 'react';
-import { Segment, Menu, Icon, Responsive, Dropdown } from 'semantic-ui-react';
+import { Menu, Icon, Responsive, Dropdown, SemanticICONS } from 'semantic-ui-react';
 import { Link } from 'react-router-dom';
-import './sidebar.css';
-import { PropsOuter as Props } from './sidebar';
 const logo = require('./ontsymbol.png');
+const walletIcon = require('./wallet.svg');
 
-const SidebarView: React.SFC<Props> = (props) => (
-    <div>
+interface Item {
+    id: string;
+    label: string;
+    icon?: SemanticICONS;
+    customIcon?: string;
+    link?: string;
+}
+
+const items: Item[] = [
+  {
+      id: 'home',
+      label: 'Home',
+      icon: 'home',
+      link: '/'
+  },
+  {
+      id: 'blocks',
+      label: 'Blocks',
+      icon: 'block layout',
+      link: '/blocks'
+  },
+  {
+      id: 'transactions',
+      label: 'Transactions',
+      icon: 'cubes',
+      link: '/transactions'
+  },
+  {
+      id: 'transfers',
+      label: 'Transfers',
+      icon: 'exchange',
+      link: '/transfers'
+  },
+  {
+      id: 'accounts',
+      label: 'Accounts',
+      icon: 'users',
+      link: '/accounts'
+  },
+  {
+      id: 'ontIds',
+      label: 'ONT IDs',
+      icon: 'id card',
+      link: '/ont-ids'
+  },
+  {
+      id: 'wallet',
+      label: 'Wallet',
+      customIcon: walletIcon,
+      link: '/wallet'
+  }
+];
+
+const MenuView: React.SFC<{}> = () => (
+    <>
         <Responsive
-            as={Menu}
             maxWidth={767}
+            as={Menu}
             inverted={true}
+            className="ont-header"
         >
             <Menu.Item className="logo" as="a" href="http://ont.io/">
                 <img src={logo} />
@@ -36,7 +89,7 @@ const SidebarView: React.SFC<Props> = (props) => (
             <Menu.Menu position="right">
                 <Dropdown item={true} icon={(<Icon name="sidebar" size="large"/>)}>
                     <Dropdown.Menu className="inverted">
-                        {props.items.map(item => (
+                        {items.map(item => (
                             <Dropdown.Item key={item.id} name={item.id} as={Link} to={item.link}>
                                 {item.icon != null ? <Icon name={item.icon} /> : null}
                                 {item.customIcon != null ? <Icon as="img" src={item.customIcon} /> : null}
@@ -55,11 +108,12 @@ const SidebarView: React.SFC<Props> = (props) => (
             icon="labeled"
             vertical={false}
             inverted={true}
+            className="ont-header"
         >
             <Menu.Item className="logo" as="a" href="http://ont.io/">
                 <img src={logo} />
             </Menu.Item>
-            {props.items.map(item => (
+            {items.map(item => (
                 <Menu.Item key={item.id} name={item.id} as={Link} to={item.link}>
                     {item.icon != null ? <Icon name={item.icon} /> : null}
                     {item.customIcon != null ? <img className="icon" src={item.customIcon} /> : null}
@@ -67,15 +121,7 @@ const SidebarView: React.SFC<Props> = (props) => (
                 </Menu.Item>
             ))}
         </Responsive>
-        <Segment className="main" basic={true}>
-            {props.children}
-        </Segment>
-        {props.footerComponent ? (
-            <Segment basic={true} className="footer">
-                <props.footerComponent/>
-            </Segment>
-        ) : null}
-    </div>
+    </>
 );
 
-export default SidebarView;
+export default MenuView;

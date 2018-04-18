@@ -16,21 +16,41 @@
  * along with The ONT Detective.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-.ui.grid.home {
-    height: calc(100vh - 180px);
+div.home {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     padding-left: 20%;
     padding-right: 20%;
+    margin-top: 4em;
 }
 
-.ui.grid.home img.logo {
+div.home .logo {
     width: 25%;
     padding-bottom: 10px;
 }
 
-.ui.grid.home h1 {
+div.home .logo img {
+    width: 100%;
+}
+
+div.home h1.ui.header {
+    text-align: center;
     font-size: 3rem;
 }
 
-.ui.button.search {
+div.home .ui.form {
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+div.home .ui.form .field {
+    align-self: stretch;
+}
+
+div.home .ui.button.search {
     margin-top: 10px;
 }

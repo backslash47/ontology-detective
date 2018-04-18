@@ -17,9 +17,8 @@
  */
 
 import * as React from 'react';
-import { PropsInner as Props } from './footer';
 
-const FooterView: React.SFC<Props> = (props) => (
+const FooterView: React.SFC<{}> = () => (
     <div>
         Matus Zamborsky © 2018
         <br />

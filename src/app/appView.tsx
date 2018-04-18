@@ -32,14 +32,11 @@ import OntIdDetail from '~/ontIds/ontIdDetail';
 import Wallet from '~/wallet/wallet';
 import CreateWallet from '~/wallet/createWallet';
 import CreateClaim from '~/ontIds/createClaim';
+import Layout from '~/layout/layoutView';
 
-import Sidebar from '~/sidebar/sidebar';
-import Footer from '~/footer/footer';
-import { PropsInner as Props } from './app';
-
-const App: React.SFC<Props> = (props) => (
+const App: React.SFC<{}> = () => (
   <Router>
-    <Sidebar items={props.menu} footerComponent={Footer} >
+    <Layout>
         <Route path="/" exact={true} component={Home} />
         <Route path="/blocks" exact={true} component={BlocksGrid} />
         <Route path="/blocks/:id" exact={true} component={BlockDetail} />
@@ -54,7 +51,7 @@ const App: React.SFC<Props> = (props) => (
         <Route path="/ont-ids/:id/create-claim" exact={true} component={CreateClaim} />
         <Route path="/wallet" exact={true} component={Wallet} />
         <Route path="/wallet/create" exact={true} component={CreateWallet} />
-    </Sidebar>
+    </Layout>
   </Router>
 );
 

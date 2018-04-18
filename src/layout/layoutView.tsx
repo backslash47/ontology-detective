@@ -1,4 +1,3 @@
-
 /*
  * Copyright (C) 2018 Matus Zamborsky
  * This file is part of The ONT Detective.
@@ -17,25 +16,21 @@
  * along with The ONT Detective.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { compose } from 'recompose';
-import { SemanticICONS } from 'semantic-ui-react';
-import SidebarView from './sidebarView';
+import * as React from 'react';
+import { Segment } from 'semantic-ui-react';
+import Footer from '~/footer/footerView';
+import Menu from '~/menu/menuView';
+  
+const LayoutView: React.SFC<{}> = (props) => (
+    <>
+        <Menu/>
+        <Segment className="ont-main" basic={true}>
+            {props.children}
+        </Segment>
+        <Segment className="ont-footer" basic={true}>
+            <Footer/>
+        </Segment>
+    </>
+);
 
-export interface Item {
-    id: string;
-    label: string;
-    icon?: SemanticICONS;
-    customIcon?: string;
-    link?: string;
-}
-
-export interface PropsOuter {
-    items: Item[];
-    footerComponent?: React.ComponentType<{}>;
-}
-
-export interface PropsInner extends PropsOuter {
-}
-
-export default compose<PropsInner, PropsOuter>(
-) (SidebarView);
+export default LayoutView;
