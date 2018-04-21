@@ -32,6 +32,7 @@ import OntIdDetail from '~/ontIds/ontIdDetail';
 import Wallet from '~/wallet/wallet';
 import CreateWallet from '~/wallet/createWallet';
 import CreateAccount from '~/wallet/createAccount';
+import CreateIdentity from '~/wallet/createIdentity';
 import CreateClaim from '~/ontIds/createClaim';
 import Transfer from '~/accounts/transfer';
 import Layout from '~/layout/layoutView';
@@ -57,6 +58,7 @@ const App: React.SFC<{}> = () => (
           <Route path="/wallet" exact={true} component={Wallet} />
           <Route path="/wallet/create" exact={true} component={CreateWallet} />
           <Route path="/wallet/create-account" exact={true} component={CreateAccount} />
+          <Route path="/wallet/create-identity" exact={true} component={CreateIdentity} />
       </Layout>
     </Analytics>
   </Router>

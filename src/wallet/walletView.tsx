@@ -107,6 +107,7 @@ const Wallet: React.SFC<Props> = (props) => (
                         menuItem: 'Identities',
                         render: () => (
                             <Tab.Pane>
+                                <Button as={Link} to="/wallet/create-identity" size="large">Create</Button>
                                 {props.wallet !== undefined ? (
                                     <WalletIdentities wallet={props.wallet} location={props.location} />
                                 ) : null}

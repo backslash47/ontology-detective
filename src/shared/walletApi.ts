@@ -9,7 +9,8 @@ import {
     scrypt, 
     Account, 
     core, 
-    TransactionBuilder
+    TransactionBuilder,
+    Identity
 } from 'ont-sdk-ts';
 import { get, find } from 'lodash';
 import TxSender from './txSender';
@@ -52,6 +53,40 @@ export function createAccount(label: string, password: string): Account {
         saveWallet(wallet.toJson());
 
         return account;
+    } else {
+        throw new Error(Errors.NOT_SIGNED_IN);
+    }
+}
+
+export async function createIdentity(label: string, password: string): Promise<Identity> {
+    const wallet = loadWallet();
+
+    if (wallet !== null) {
+        // check password
+        if (wallet.defaultOntid !== undefined) {
+            const defIdentity = find(wallet.identities, ident => ident.ontid === wallet.defaultOntid);
+
+            if (defIdentity !== undefined) {
+                try {
+                    const encryptedPrivateKey = defIdentity.controls[0].key;
+                    scrypt.decrypt(encryptedPrivateKey, password);
+                } catch (e) {
+                    throw new Error(Errors.WRONG_PASSWORD);        
+                }
+            }
+        }
+
+        const identity = new Identity();
+        const privateKey = core.generatePrivateKeyStr();
+        identity.create(privateKey, password, label);
+
+        wallet.addIdentity(identity);
+
+        saveWallet(wallet.toJson());
+
+        await registerIdentity(identity.ontid, privateKey);
+
+        return identity;
     } else {
         throw new Error(Errors.NOT_SIGNED_IN);
     }
