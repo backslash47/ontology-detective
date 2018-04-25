@@ -42,3 +42,6 @@ export const AssetIdToName = {
     [Assets.ONT_ID] : 'ONT ID',
     [Assets.ONT_ID2] : 'ONT ID v2'
 };
+
+export const restUrl = 'http://polaris1.ont.io:20334';
+export const websocketUrl = 'ws://polaris1.ont.io:20335';

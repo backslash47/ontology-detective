@@ -25,6 +25,7 @@ function parse(ddoStr: string, version?: string): Ddo {
         ontDdo = v2deserializeDDO(ddoStr);
     }
 
+    console.log('ddo', ontDdo);
     const Attributes: DdoAttribute[] = [];
     const Claims: DdoClaim[] = [];
 
@@ -72,7 +73,8 @@ export async function getDdo(ontId: string, version?: string): Promise<Ddo> {
     } else {
         tx = v2buildGetDDOTx(ontId);
     }
-
+    console.log(tx);
+    console.log(tx.serialize());
     const client = new RestClient(CONST.TEST_ONT_URL.REST_URL);
     const response: DdoResponse = await (client.sendRawTransaction(tx.serialize(), true) as Promise<DdoResponse>);
     

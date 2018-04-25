@@ -29,7 +29,7 @@ import { indexOntId, getOntId } from '../shared/ontIdApi';
 import { getDdo } from '../shared/ddoApi';
 
 import { Token, utils, core, DDO, CONST, Wallet, scrypt, TransactionBuilder, TxSender, OntidContract, Claim, Metadata, WebSocketClientApi, RestClient } from 'ont-sdk-ts';
-import { Assets, OntIdAction, OntIdAttributeOperation, OntIdRegisterOperation } from '../const';
+import { Assets, OntIdAction, OntIdAttributeOperation, OntIdRegisterOperation, restUrl, websocketUrl } from '../const';
 import { sleep } from '../utils';
 
 const { StringReader } = utils;
@@ -266,7 +266,7 @@ function fixEventResponse(response: EventResponse) {
 }
 
 async function fetchEvents(txHash: string): Promise<Event[]> {
-    const client = new RestClient(CONST.TEST_ONT_URL.REST_URL);
+    const client = new RestClient(restUrl);
     const data = await client.getSmartCodeEvent(txHash);
 
     fixEventResponse(data);
@@ -281,7 +281,7 @@ export async function createOntId() {
     const param = TransactionBuilder.buildTxParam(tx);
     console.log('sending: ', param);
     
-    const txSender = new TxSender(CONST.TEST_ONT_URL.SOCKET_URL);
+    const txSender = new TxSender(websocketUrl);
     txSender.sendTxWithSocket(param, (res, socket) => {
         console.log("receiving:", JSON.stringify(res));
     });
@@ -317,7 +317,7 @@ export async function createOntClaim() {
     console.log('sending: ', param);
     //send the transaction
 
-    const txSender = new TxSender(CONST.TEST_ONT_URL.SOCKET_URL);
+    const txSender = new TxSender(websocketUrl);
     txSender.sendTxWithSocket(param, (res, socket) => {
         console.log("receiving:", JSON.stringify(res));
     });
@@ -348,7 +348,7 @@ export async function createOntClaim() {
 // }
 
 export async function ingestBlocks(): Promise<void> {
-    const socket = CONST.TEST_ONT_URL.SOCKET_URL;
+    const socket = websocketUrl;
     const ws = new ReconnectingWebSocket(socket, undefined, { constructor: Html5WebSocket });
 
     let lastBlock = await getLastBlock();
