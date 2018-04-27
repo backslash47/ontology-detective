@@ -120,11 +120,11 @@ export async function transferAsset(
                     const raw = builder.sendRawTransaction(tx.serialize());
                     
                     const txSender = new TxSender(CONST.TEST_ONT_URL.SOCKET_URL);
-                    txSender.sendTxWithSocket(raw, (err, res, socket) => {
+                    txSender.sendTxWithSocket(raw, (err, res, socket) => {     
                         if (err !== null) {
                             reject(err);
                         } else if (
-                            get(res, 'Action') === 'InvokeTransaction' && 
+                            get(res, 'Action') === 'Notify' && 
                             get(res, 'Desc') === 'SUCCESS' &&
                             socket !== null
                         ) {
@@ -215,7 +215,7 @@ export async function registerSelfClaim(
                         if (err !== null) {
                             reject(err);
                         } else if (
-                            get(res, 'Action') === 'InvokeTransaction' && 
+                            get(res, 'Action') === 'Notify' && 
                             get(res, 'Desc') === 'SUCCESS' &&
                             socket !== null
                         ) {

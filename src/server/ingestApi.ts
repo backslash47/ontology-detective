@@ -296,7 +296,7 @@ export async function ingestBlocks(): Promise<void> {
     const ws = new ReconnectingWebSocket(socket, undefined, { constructor: Html5WebSocket });
 
     let lastBlock = await getLastBlock();
-    let last = 32343; //lastBlock ? lastBlock.Height : -1; // 186162; 
+    let last = lastBlock ? lastBlock.Height : -1; // 186162; 
     let working: number | null = null;
     
     const builder = new WebSocketClientApi();
