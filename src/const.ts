@@ -19,8 +19,7 @@
 export enum Assets {
     ONT = 'ff00000000000000000000000000000000000001',
     ONG = 'ff00000000000000000000000000000000000002',
-    ONT_ID = '80e7d2fc22c24c466f44c7688569cc6e6d6c6f92',
-    ONT_ID2 = '8055b362904715fd84536e754868f4c8d27ca3f6'
+    ONT_ID = '80b0cc71bda8653599c5666cae084bff587e2de1'
 }
 
 export enum OntIdAction {
@@ -39,8 +38,7 @@ export enum OntIdAttributeOperation {
 export const AssetIdToName = {
     [Assets.ONT] : 'ONT',
     [Assets.ONG] : 'ONG',
-    [Assets.ONT_ID] : 'ONT ID',
-    [Assets.ONT_ID2] : 'ONT ID v2'
+    [Assets.ONT_ID] : 'ONT ID'
 };
 
 export const restUrl = 'http://polaris1.ont.io:20334';

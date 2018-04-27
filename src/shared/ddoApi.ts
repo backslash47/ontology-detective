@@ -1,9 +1,7 @@
 import { get } from 'lodash';
-import { CONST, DDO as OntDdo, Transaction, RestClient } from 'ont-sdk-ts';
+import { CONST, RestClient } from 'ont-sdk-ts';
 import { DdoAttribute, Ddo, DdoClaim } from './ont/model';
-import { buildGetDDOTx as v1buildGetDDOTx } from './contracts/v1/txBuilder.v1';
 import { buildGetDDOTx as v2buildGetDDOTx } from './contracts/v2/txBuilder.v2';
-import v1deserializeDDO  from './contracts/v1/deserializer.v1';
 import v2deserializeDDO  from './contracts/v2/deserializer.v2';
 
 interface DdoResponse {
@@ -18,12 +16,7 @@ function convertISODate(str: string): number {
 }
 
 function parse(ddoStr: string, version?: string): Ddo {
-    let ontDdo: OntDdo;
-    if (version === '80e7d2fc22c24c466f44c7688569cc6e6d6c6f92') {
-        ontDdo = v1deserializeDDO(ddoStr);
-    } else {
-        ontDdo = v2deserializeDDO(ddoStr);
-    }
+    const ontDdo = v2deserializeDDO(ddoStr);
 
     console.log('ddo', ontDdo);
     const Attributes: DdoAttribute[] = [];
@@ -66,13 +59,8 @@ function parse(ddoStr: string, version?: string): Ddo {
 
 export async function getDdo(ontId: string, version?: string): Promise<Ddo> {
     
-    let tx: Transaction;
-
-    if (version === '80e7d2fc22c24c466f44c7688569cc6e6d6c6f92') {
-        tx = v1buildGetDDOTx(ontId);
-    } else {
-        tx = v2buildGetDDOTx(ontId);
-    }
+    const tx = v2buildGetDDOTx(ontId);
+ 
     console.log(tx);
     console.log(tx.serialize());
     const client = new RestClient(CONST.TEST_ONT_URL.REST_URL);

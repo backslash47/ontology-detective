@@ -93,7 +93,7 @@ async function ingestContract(transaction: Transaction): Promise<void> {
             
             if (event.CodeHash === Assets.ONT || event.CodeHash === Assets.ONG) {
                 await ingestTransfer(transaction, i, event);
-            } else if (event.CodeHash === Assets.ONT_ID || event.CodeHash === Assets.ONT_ID2) {
+            } else if (event.CodeHash === Assets.ONT_ID) {
                 await ingestOntIdChange(transaction, i, event);
             }
         }
@@ -247,7 +247,7 @@ function fixEventResponse(response: EventResponse) {
                 if (Array.isArray(result.States[2])) {
                     result.States[2] = utils.ab2hexstring(result.States[2]);
                 }
-            } else if (result.CodeHash === Assets.ONT_ID || result.CodeHash === Assets.ONT_ID2) {
+            } else if (result.CodeHash === Assets.ONT_ID) {
 
                 for (let state of result.States) {
                     const params: string[] = state as string[];

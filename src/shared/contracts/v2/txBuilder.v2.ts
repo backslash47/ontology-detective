@@ -15,5 +15,5 @@ export function buildGetDDOTx(ontid: string): Transaction {
     const p2 = new Parameter(f.parameters[1].getName(), ParameterType.ByteArray, nonce);
     f.setParamsValue(p1, p2);
 
-    return TransactionBuilder.makeInvokeTransaction(f, abiInfo.getHash());
+    return TransactionBuilder.makeInvokeTransaction(f.name, f.parameters, abiInfo.getHash());
 }

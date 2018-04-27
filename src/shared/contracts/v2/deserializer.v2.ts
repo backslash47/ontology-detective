@@ -6,7 +6,7 @@ export default function(hexstr: string) {
     const ss = new StringReader(hexstr);
     let ddo = new DDO();
     // total length of public keys - 4 bytes
-    const pkTotalLen = parseInt(ss.read(4), 16);
+    const pkTotalLen = parseInt(ss.read(4), 16);  
     if (pkTotalLen > 0) {
         const pkNum = parseInt(ss.read(4), 16);
         for (let i = 0; i < pkNum; i++) {
@@ -23,7 +23,7 @@ export default function(hexstr: string) {
             ddo.publicKeys.push(pubKey);
         }
     }
-
+    
     // attribute number - 4bytes
     const attrTotalLen = parseInt(ss.read(4), 16);
     if (attrTotalLen > 0) {

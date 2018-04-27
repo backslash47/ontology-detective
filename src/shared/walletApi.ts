@@ -155,7 +155,7 @@ export async function registerIdentity(ontId: string, privKey: string): Promise<
             if (err !== null) {
                 reject(err);
             } else if (
-                get(res, 'Action') === 'InvokeTransaction' && 
+                get(res, 'Action') === 'Notify' && 
                 get(res, 'Desc') === 'SUCCESS' &&
                 socket !== null
             ) {
