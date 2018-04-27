@@ -87,6 +87,15 @@ async function ingestContract(transaction: Transaction): Promise<void> {
         transaction.EventsLoaded = true;
     }
 
+    if (transaction.EventsLoaded === true && transaction.Events.length > 0) {
+        const events = await fetchEvents(transaction.Hash);
+        
+        // save loaded events
+        transaction.Events = events;
+        transaction.Result = transaction.Events !== null;
+        transaction.EventsLoaded = true;
+    }
+
     if (transaction.Events !== null) {
         for (let i = 0; i < transaction.Events.length; i++) {
             const event = transaction.Events[i];
