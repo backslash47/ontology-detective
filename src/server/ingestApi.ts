@@ -35,15 +35,13 @@ import { sleep } from '../utils';
 const { StringReader } = utils;
 const { Transfers, Contract } = Token;
 
-async function changeBalance(u160Address: string, assetAddress: string, value: number, transaction: Transaction) {
+async function changeBalance(address: string, assetAddress: string, value: number, transaction: Transaction) {
     let account: Account;
 
     const ontBalance = assetAddress === Assets.ONT ? value : 0;
     const ongBalance = assetAddress === Assets.ONG ? value : 0;
 
     try {
-        const address = core.u160ToAddress(u160Address);
-
         account = await getAccount(address);
         account.lastTx = transaction.Hash;
         account.lastTime = transaction.Timestamp;
@@ -53,8 +51,7 @@ async function changeBalance(u160Address: string, assetAddress: string, value: n
 
     } catch (e) {
         account = {
-            address: core.u160ToAddress(u160Address),
-            u160Address,
+            address,
             firstTx: transaction.Hash,
             firstTime: transaction.Timestamp,
             lastTx: transaction.Hash,
@@ -79,15 +76,6 @@ function setCharAt(str: string, index: number, chr: string) {
 async function ingestContract(transaction: Transaction): Promise<void> {
     if (transaction.EventsLoaded !== true) {
         // load events only if not loaded yet
-        const events = await fetchEvents(transaction.Hash);
-        
-        // save loaded events
-        transaction.Events = events;
-        transaction.Result = transaction.Events !== null;
-        transaction.EventsLoaded = true;
-    }
-
-    if (transaction.EventsLoaded === true && transaction.Events !== undefined) {
         const events = await fetchEvents(transaction.Hash);
         
         // save loaded events
@@ -121,13 +109,15 @@ async function ingestTransfer(transaction: Transaction, i: number, event: Event)
         Id: transaction.Hash + '-' + i,
         Asset: asset,
         Value: value,
-        From: from !== '0000000000000000000000000000000000000000' ? core.u160ToAddress(from) : undefined,
-        To: core.u160ToAddress(to),
+        From: from !== '0000000000000000000000000000000000000000' ? from : undefined,
+        To: to,
         TxHash: transaction.Hash,
         BlockHash: transaction.BlockHash,
         BlockIndex: transaction.BlockIndex,
         Timestamp: transaction.Timestamp
     };
+
+    console.log('Transfer from', from, 'to', to);
 
     if (transfer.From !== undefined) {
         await changeBalance(from, asset, -Number(value), transaction);
@@ -277,56 +267,6 @@ async function fetchEvents(txHash: string): Promise<Event[]> {
     return data.Result;
 }
 
-export async function createOntId() {
-    const ontId = 'did:ont:THKWoVP247EHUNt8DFH3sj23TWGHvCYwFm';
-    const privateKey = 'ccd14ca73dd2043401cd598b249a282aa202b6a7bcdc1c8108c3befb3774acae';
-    
-    const tx = OntidContract.buildRegisterOntidTx(ontId, privateKey)
-    const param = TransactionBuilder.buildTxParam(tx);
-    console.log('sending: ', param);
-    
-    const txSender = new TxSender(websocketUrl);
-    txSender.sendTxWithSocket(param, (res, socket) => {
-        console.log("receiving:", JSON.stringify(res));
-    });
-}
-
-export async function createOntClaim() {
-    const ontId = 'did:ont:THKWoVP247EHUNt8DFH3sj23TWGHvCYwFm';
-    const privateKey = 'ccd14ca73dd2043401cd598b249a282aa202b6a7bcdc1c8108c3befb3774acae';
-
-    const context = 'claim:standard0001';
-    const claimData = {
-        test: 'backslash'
-    };
-    
-    let date = (new Date()).toISOString()
-    if(date.indexOf('.') > -1) {
-        date = date.substring(0, date.indexOf('.')) + 'Z'
-    }
-    
-    const metadata = new Metadata();
-    metadata.CreateTime = date;
-    metadata.Issuer = ontId;
-    metadata.Subject = ontId;
-    
-    const claim = new Claim(context, claimData, metadata)
-    claim.sign(privateKey);
-    
-    const type = utils.str2hexstr('Json')
-    const value = utils.str2hexstr(JSON.stringify(claim));
-
-    const tx = OntidContract.buildAddAttributeTx(utils.str2hexstr('claim:' + claim.Id), value, type, ontId, privateKey);
-    const param = TransactionBuilder.buildTxParam(tx);
-    console.log('sending: ', param);
-    //send the transaction
-
-    const txSender = new TxSender(websocketUrl);
-    txSender.sendTxWithSocket(param, (res, socket) => {
-        console.log("receiving:", JSON.stringify(res));
-    });
-}
-
 // function constructHeartBeat(): string {
 //     const request = {
 //         Action: 'heartbeat',
@@ -356,14 +296,9 @@ export async function ingestBlocks(): Promise<void> {
     const ws = new ReconnectingWebSocket(socket, undefined, { constructor: Html5WebSocket });
 
     let lastBlock = await getLastBlock();
-    let last = lastBlock ? lastBlock.Height : -1; // 186162; 
+    let last = 32343; //lastBlock ? lastBlock.Height : -1; // 186162; 
     let working: number | null = null;
-    //  const resp = await fetchEvents('473fdea5859f719814f05b67116252046369236799500bc4b698ff77994707ce');
-    //  console.log(JSON.stringify(resp));
-
-    // const ddo = await getDdo('did:ont:THKWoVP247EHUNt8DFH3sj23TWGHvCYwFm', '8055b362904715fd84536e754868f4c8d27ca3f6');
-    // const ddo = await getDdo('did:ont:TVgVkbY7edVEXjCG3dvTpooX4ZBNfZqjhn', '80e7d2fc22c24c466f44c7688569cc6e6d6c6f92');
-
+    
     const builder = new WebSocketClientApi();
     
     ws.onopen = function open() {

@@ -17,7 +17,6 @@
  */
 
 import { SearchParams } from 'elasticsearch';
-import { core } from 'ont-sdk-ts';
 import { concat } from 'lodash';
 import { getClient } from './elastic/api';
 import { Indices } from './elastic/model';
@@ -83,7 +82,6 @@ export async function getAccountsByIds(
 
     const missingAccounts: Account[] = missingAddresses.map(address => ({
         address,
-        u160Address: core.addressToU160(address),
         transactionsCount: 0,
         ontBalance: 0,
         ongBalance: 0

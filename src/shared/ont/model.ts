@@ -128,7 +128,6 @@ export interface Sig {
 
 export type Account = {
     address: string;
-    u160Address: string,
     firstTime?: number;
     firstTx?: string;
     lastTime?: number;
