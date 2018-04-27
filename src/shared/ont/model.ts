@@ -151,7 +151,7 @@ export type Transfer = {
 };
 
 export interface Event {
-    CodeHash: number[] | string;
+    ContractAddress: number[] | string;
     States: (string | number[] | string[])[];
     TxHash: number[] | string;
 }

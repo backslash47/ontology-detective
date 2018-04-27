@@ -90,10 +90,11 @@ async function ingestContract(transaction: Transaction): Promise<void> {
     if (transaction.Events !== null) {
         for (let i = 0; i < transaction.Events.length; i++) {
             const event = transaction.Events[i];
+            console.log('event', event);
             
-            if (event.CodeHash === Assets.ONT || event.CodeHash === Assets.ONG) {
+            if (event.ContractAddress === Assets.ONT || event.ContractAddress === Assets.ONG) {
                 await ingestTransfer(transaction, i, event);
-            } else if (event.CodeHash === Assets.ONT_ID) {
+            } else if (event.ContractAddress === Assets.ONT_ID) {
                 await ingestOntIdChange(transaction, i, event);
             }
         }
@@ -102,7 +103,7 @@ async function ingestContract(transaction: Transaction): Promise<void> {
 
 async function ingestTransfer(transaction: Transaction, i: number, event: Event) {
 
-    const asset: string = event.CodeHash as string;
+    const asset: string = event.ContractAddress as string;
     const from: string = event.States[1] as string;
     const to: string = event.States[2] as string;
     const value: number = Number(event.States[3]);
@@ -129,13 +130,11 @@ async function ingestTransfer(transaction: Transaction, i: number, event: Event)
 
 async function ingestOntIdChange(transaction: Transaction, i: number, event: Event): Promise<void> {
 
-    const params: string[] = event.States[0] as string[];
-
-    const action: OntIdAction = params[0] as OntIdAction;
-    const ontId: string = params[2];
+    const action: OntIdAction = event.States[0] as OntIdAction;
+    const ontId: string = event.States[2] as string;
 
     if (action === OntIdAction.Register) {
-        const operation: OntIdRegisterOperation = params[1] as OntIdRegisterOperation;
+        const operation: OntIdRegisterOperation = event.States[1] as OntIdRegisterOperation;
 
         if (operation === OntIdRegisterOperation.register) {
             console.log('Registering new ontId ', ontId);
@@ -148,18 +147,18 @@ async function ingestOntIdChange(transaction: Transaction, i: number, event: Eve
                 LastTimestamp: transaction.Timestamp,
                 Claims: [],
                 ClaimsCount: 0,
-                CodeHash: event.CodeHash.toString()
+                CodeHash: event.ContractAddress.toString()
             };
 
             await indexOntId(ontIdObject);
         }
     } else if (action === OntIdAction.Attribute) {
-        const operation: OntIdAttributeOperation = params[1] as OntIdAttributeOperation;
+        const operation: OntIdAttributeOperation = event.States[1] as OntIdAttributeOperation;
 
         if (operation === OntIdAttributeOperation.add) {
             console.log('Adding attribute to ontId ', ontId);
 
-            const attribute: string = params[3];
+            const attribute: string = event.States[3] as string;
 
             let ontIdObject = await getOntId(ontId);
 
@@ -234,12 +233,12 @@ class EventResponse {
 function fixEventResponse(response: EventResponse) {
     if (response.Result != null) {
         for (let result of response.Result) {
-            if (Array.isArray(result.CodeHash)) {
-                result.CodeHash = utils.ab2hexstring(result.CodeHash);
+            if (Array.isArray(result.ContractAddress)) {
+                result.ContractAddress = utils.ab2hexstring(result.ContractAddress);
             }
 
-            if (result.CodeHash === Assets.ONT ||
-                result.CodeHash === Assets.ONG) {
+            if (result.ContractAddress === Assets.ONT ||
+                result.ContractAddress === Assets.ONG) {
                 if (Array.isArray(result.States[1])) {
                     result.States[1] = utils.ab2hexstring(result.States[1]);
                 }
@@ -247,14 +246,10 @@ function fixEventResponse(response: EventResponse) {
                 if (Array.isArray(result.States[2])) {
                     result.States[2] = utils.ab2hexstring(result.States[2]);
                 }
-            } else if (result.CodeHash === Assets.ONT_ID) {
+            } else if (result.ContractAddress === Assets.ONT_ID) {
 
-                for (let state of result.States) {
-                    const params: string[] = state as string[];
-
-                    for (let i = 0; i < params.length; i++) {
-                        params[i] = utils.hexstr2str(params[i]);
-                    }
+                for (let i = 0; i < result.States.length; i++) {    
+                    result.States[i] = utils.hexstr2str(result.States[i] as string);
                 }
             }
 
