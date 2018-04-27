@@ -18,7 +18,6 @@ function convertISODate(str: string): number {
 function parse(ddoStr: string, version?: string): Ddo {
     const ontDdo = v2deserializeDDO(ddoStr);
 
-    console.log('ddo', ontDdo);
     const Attributes: DdoAttribute[] = [];
     const Claims: DdoClaim[] = [];
 
@@ -61,13 +60,11 @@ export async function getDdo(ontId: string, version?: string): Promise<Ddo> {
     
     const tx = v2buildGetDDOTx(ontId);
  
-    console.log(tx);
-    console.log(tx.serialize());
     const client = new RestClient(CONST.TEST_ONT_URL.REST_URL);
     const response: DdoResponse = await (client.sendRawTransaction(tx.serialize(), true) as Promise<DdoResponse>);
-    
+  
     if (response.Result != null && response.Result.length > 0) {
-        return parse(response.Result[0], version);
+        return parse(response.Result, version);
     } else {
         throw new Error('Cant fetch ddo.');
     }
