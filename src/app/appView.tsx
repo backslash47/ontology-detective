@@ -34,6 +34,7 @@ import CreateWallet from '~/wallet/createWallet';
 import CreateAccount from '~/wallet/createAccount';
 import CreateIdentity from '~/wallet/createIdentity';
 import CreateClaim from '~/ontIds/createClaim';
+import RequestEmailClaim from '~/ontIds/requestEmailClaim';
 import Transfer from '~/accounts/transfer';
 import Layout from '~/layout/layoutView';
 import Analytics from 'react-router-ga';
@@ -55,6 +56,7 @@ const App: React.SFC<{}> = () => (
           <Route path="/ont-ids" exact={true} component={OntIdsGrid} />
           <Route path="/ont-ids/:id" exact={true} component={OntIdDetail} />
           <Route path="/ont-ids/:id/create-claim" exact={true} component={CreateClaim} />
+          <Route path="/ont-ids/:id/request-email-claim" exact={true} component={RequestEmailClaim} />
           <Route path="/wallet" exact={true} component={Wallet} />
           <Route path="/wallet/create" exact={true} component={CreateWallet} />
           <Route path="/wallet/create-account" exact={true} component={CreateAccount} />
