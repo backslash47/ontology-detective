@@ -20,7 +20,7 @@ import { compose, withState, withHandlers, flattenProp } from 'recompose';
 import { get } from 'lodash';
 import { RouterProps } from 'react-router';
 import { withRouter } from 'react-router-dom';
-import { Wallet, scrypt } from 'ont-sdk-ts';
+import { Wallet } from 'ont-sdk-ts';
 import { StateSetter } from '~/utils';
 import { registerIdentity, saveWallet } from '~/shared/walletApi';
 import View from './createWalletView';
@@ -62,8 +62,7 @@ export default compose<PropsInner, PropsOuter>(
             const wallet = Wallet.createIdentityWallet(password, name);
             
             const identity = wallet.identities[0];
-            const encryptedKey = identity.controls[0].key;
-            const privateKey = scrypt.decrypt(encryptedKey, password);
+            const privateKey = identity.controls[0].encryptedKey.decrypt(password);
             
             await registerIdentity(identity.ontid, privateKey);
 

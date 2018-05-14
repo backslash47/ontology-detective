@@ -1,21 +1,21 @@
 import { 
     OntidContract, 
-    WebSocketClientApi, 
+    WebsocketClient, 
     CONST, 
     Wallet, 
-    Metadata, 
     Claim, 
     utils, 
-    scrypt, 
+    crypto,
     Account, 
-    core, 
     TransactionBuilder,
     Identity
 } from 'ont-sdk-ts';
-import { get, find } from 'lodash';
-import TxSender from './txSender';
+import { find } from 'lodash';
 
-const builder = new WebSocketClientApi();
+import PrivateKey = crypto.PrivateKey;
+import Address = crypto.Address;
+
+const client = new WebsocketClient(CONST.TEST_ONT_URL.SOCKET_URL);
 
 export enum Errors {
     NOT_SIGNED_IN = 'Not signed in',
@@ -33,8 +33,7 @@ export function createAccount(label: string, password: string): Account {
 
             if (identity !== undefined) {
                 try {
-                    const encryptedPrivateKey = identity.controls[0].key;
-                    scrypt.decrypt(encryptedPrivateKey, password);
+                    identity.controls[0].encryptedKey.decrypt(password);
                 } catch (e) {
                     throw new Error(Errors.WRONG_PASSWORD);        
                 }
@@ -42,15 +41,15 @@ export function createAccount(label: string, password: string): Account {
         }
 
         const account = new Account();
-        const privateKey = core.generatePrivateKeyStr();
+        const privateKey = PrivateKey.random();
         account.create(privateKey, password, label);
 
         wallet.addAccount(account);
         if (wallet.defaultAccountAddress === '') {
-            wallet.setDefaultAccount(account.address);
+            wallet.setDefaultAccount(account.address.toBase58());
         }
 
-        saveWallet(wallet.toJson());
+        saveWallet(wallet);
 
         return account;
     } else {
@@ -68,8 +67,7 @@ export async function createIdentity(label: string, password: string): Promise<I
 
             if (defIdentity !== undefined) {
                 try {
-                    const encryptedPrivateKey = defIdentity.controls[0].key;
-                    scrypt.decrypt(encryptedPrivateKey, password);
+                    defIdentity.controls[0].encryptedKey.decrypt(password);
                 } catch (e) {
                     throw new Error(Errors.WRONG_PASSWORD);        
                 }
@@ -77,12 +75,11 @@ export async function createIdentity(label: string, password: string): Promise<I
         }
 
         const identity = new Identity();
-        const privateKey = core.generatePrivateKeyStr();
+        const privateKey = PrivateKey.random();
         identity.create(privateKey, password, label);
 
         wallet.addIdentity(identity);
-
-        saveWallet(wallet.toJson());
+        saveWallet(wallet);
 
         await registerIdentity(identity.ontid, privateKey);
 
@@ -93,77 +90,49 @@ export async function createIdentity(label: string, password: string): Promise<I
 }
 
 export async function transferAsset(
-    from: string, 
-    to: string, 
+    fromStr: string, 
+    toStr: string, 
     password: string, 
     amount: number
 ): Promise<void> {
     const wallet = loadWallet();
 
+    const from = new Address(fromStr);
+    const to = new Address(toStr);
+
     if (wallet !== null) {
-        const account = find(wallet.accounts, a => a.address === from);
+        const account = find(wallet.accounts, a => a.address.equals(from));
         
         if (account !== undefined) {
 
             try {
-                const encryptedPrivateKey = account.key;
-                const privateKey = scrypt.decrypt(encryptedPrivateKey, password);
+                const privateKey = account.encryptedKey.decrypt(password);
+ 
+                const tx = TransactionBuilder.makeTransferTransaction(
+                    'ONT', 
+                    from, 
+                    to, 
+                    amount.toString(), 
+                    privateKey
+                );
+                await client.sendRawTransaction(tx.serialize(), false, true);
 
-                return new Promise<void>((resolve, reject) => {
-                    const tx = TransactionBuilder.makeTransferTransaction(
-                        'ONT', 
-                        core.addressToU160(from), 
-                        core.addressToU160(to), 
-                        amount.toString(), 
-                        privateKey
-                    );
-                    const raw = builder.sendRawTransaction(tx.serialize());
-                    
-                    const txSender = new TxSender(CONST.TEST_ONT_URL.SOCKET_URL);
-                    txSender.sendTxWithSocket(raw, (err, res, socket) => {     
-                        if (err !== null) {
-                            reject(err);
-                        } else if (
-                            get(res, 'Action') === 'Notify' && 
-                            get(res, 'Desc') === 'SUCCESS' &&
-                            socket !== null
-                        ) {
-                            socket.close();
-                            resolve();
-                        }
-                    });
-                }); 
             } catch (e) {
-                return Promise.reject(Errors.WRONG_PASSWORD);        
+                throw new Error(Errors.WRONG_PASSWORD);
             }
         } else {
-            return Promise.reject(Errors.IDENTITY_NOT_FOUND);
+            throw new Error(Errors.IDENTITY_NOT_FOUND);
         }
     } else {
-        return Promise.reject(Errors.NOT_SIGNED_IN);
+        throw new Error(Errors.NOT_SIGNED_IN);
     }
 }
 
-export async function registerIdentity(ontId: string, privKey: string): Promise<string> {
-    return new Promise<string>((resolve, reject) => {
-        const tx = OntidContract.buildRegisterOntidTx(ontId, privKey);
-        const raw = builder.sendRawTransaction(tx.serialize());
+export async function registerIdentity(ontId: string, privKey: PrivateKey): Promise<string> {
+    const tx = OntidContract.buildRegisterOntidTx(ontId, privKey);
+    await client.sendRawTransaction(tx.serialize(), false, true);
 
-        const txSender = new TxSender(CONST.TEST_ONT_URL.SOCKET_URL);
-        txSender.sendTxWithSocket(raw, (err, res, socket) => {
-            
-            if (err !== null) {
-                reject(err);
-            } else if (
-                get(res, 'Action') === 'Notify' && 
-                get(res, 'Desc') === 'SUCCESS' &&
-                socket !== null
-            ) {
-                socket.close();
-                resolve(ontId);
-            }
-        });
-    }); 
+    return ontId;
 }
 
 export async function registerSelfClaim(
@@ -173,6 +142,7 @@ export async function registerSelfClaim(
     data: object
 ): Promise<string> {
     const wallet = loadWallet();
+    const publicKeyId = ontId + '#keys-1';
 
     if (wallet !== null) {
         const identity = find(wallet.identities, ident => ident.ontid === ontId);
@@ -180,58 +150,40 @@ export async function registerSelfClaim(
         if (identity !== undefined) {
 
             try {
-                const encryptedPrivateKey = identity.controls[0].key;
-                const privateKey = scrypt.decrypt(encryptedPrivateKey, password);
+                const privateKey = identity.controls[0].encryptedKey.decrypt(password);
 
-                return new Promise<string>((resolve, reject) => {
-                    let date = (new Date()).toISOString();
-                    if (date.indexOf('.') > -1) {
-                        date = date.substring(0, date.indexOf('.')) + 'Z';
-                    }
-                    
-                    const metadata = new Metadata();
-                    metadata.CreateTime = date;
-                    metadata.Issuer = ontId;
-                    metadata.Subject = ontId;
-                    
-                    const claim = new Claim(context, data, metadata);
-                    claim.sign(privateKey);
-                    
-                    const type = utils.str2hexstr('Json');
-                    const value = utils.str2hexstr(JSON.stringify(claim));
-            
-                    const tx = OntidContract.buildAddAttributeTx(
-                        utils.str2hexstr('claim:' + claim.Id), 
-                        value, 
-                        type, 
-                        ontId, 
-                        privateKey
-                    );
-                    const raw = builder.sendRawTransaction(tx.serialize());
-                    
-                    const txSender = new TxSender(CONST.TEST_ONT_URL.SOCKET_URL);
-                    txSender.sendTxWithSocket(raw, (err, res, socket) => {
-                            
-                        if (err !== null) {
-                            reject(err);
-                        } else if (
-                            get(res, 'Action') === 'Notify' && 
-                            get(res, 'Desc') === 'SUCCESS' &&
-                            socket !== null
-                        ) {
-                            socket.close();
-                            resolve(ontId);
-                        }
-                    });
-                }); 
+                const metadata = {
+                    issuer: ontId,
+                    subject: ontId,
+                    issuedAt: utils.now() 
+                };
+                const claim = new Claim(metadata, undefined, false);
+                claim.context = context;
+                claim.content = data;
+                
+                await claim.sign(CONST.TEST_ONT_URL.REST_URL, publicKeyId, privateKey);
+                
+                const type = utils.str2hexstr('Json');
+                const value = utils.str2hexstr(JSON.stringify(claim));
+        
+                const tx = OntidContract.buildAddAttributeTx(
+                    utils.str2hexstr('claim:' + claim.metadata.messageId), 
+                    value, 
+                    type, 
+                    ontId, 
+                    privateKey
+                );
+                await client.sendRawTransaction(tx.serialize(), false, true);
+                
+                return ontId;
             } catch (e) {
-                return Promise.reject(Errors.WRONG_PASSWORD);        
+                throw new Error(Errors.WRONG_PASSWORD);
             }
         } else {
-            return Promise.reject(Errors.IDENTITY_NOT_FOUND);
+            throw new Error(Errors.IDENTITY_NOT_FOUND);
         }
     } else {
-        return Promise.reject(Errors.NOT_SIGNED_IN);
+        throw new Error(Errors.NOT_SIGNED_IN);
     }
 }
 
@@ -277,7 +229,7 @@ export function isOwnAccount(address: string): boolean {
     const wallet = loadWallet();
 
     if (wallet !== null) {
-        return wallet.accounts.map(a => a.address).includes(address);
+        return wallet.accounts.map(a => a.address.toBase58()).includes(address);
     }
 
     return false;

@@ -38,7 +38,7 @@ export default compose<Props, PropsOuter>(
             size: number, 
             sortColumn: SortColumn, 
             order: Direction
-        ) => getAccountsByIds(props.wallet.accounts.map(a => a.address), from, size, sortColumn, order),
+        ) => getAccountsByIds(props.wallet.accounts.map(a => a.address.toBase58()), from, size, sortColumn, order),
         sort: 'lastTime',
         order: 'descending',
     })),

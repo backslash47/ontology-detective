@@ -27,8 +27,20 @@ import { indexTransfer } from '../shared/transfersApi';
 import { indexBlock, getLastBlock } from '../shared/blocksApi';
 import { indexOntId, getOntId } from '../shared/ontIdApi';
 import { getDdo } from '../shared/ddoApi';
-
-import { Token, utils, core, DDO, CONST, Wallet, scrypt, TransactionBuilder, TxSender, OntidContract, Claim, Metadata, WebSocketClientApi, RestClient } from 'ont-sdk-ts';
+import { 
+    Token, 
+    utils, 
+    core, 
+    DDO, 
+    CONST, 
+    Wallet, 
+    scrypt, 
+    TransactionBuilder, 
+    OntidContract, 
+    Claim, 
+    WebsocketBuilder, 
+    RestClient 
+} from 'ont-sdk-ts';
 import { Assets, OntIdAction, OntIdAttributeOperation, OntIdRegisterOperation, restUrl, websocketUrl } from '../const';
 import { sleep } from '../utils';
 
@@ -174,7 +186,7 @@ async function ingestOntIdChange(transaction: Transaction, i: number, event: Eve
                     }
                 ],
                 ClaimsCount: ontIdObject.ClaimsCount + 1
-            }
+            };
 
             await indexOntId(ontIdObject);
         }
@@ -299,11 +311,9 @@ export async function ingestBlocks(): Promise<void> {
     let last = lastBlock ? lastBlock.Height : -1; // 186162; 
     let working: number | null = null;
     
-    const builder = new WebSocketClientApi();
-    
     ws.onopen = function open() {
         console.log('Websocket connected. Starting from ', last + 1);
-        ws.send(builder.getBlockJson(last + 1));
+        ws.send(WebsocketBuilder.getBlockJson(last + 1));
     };
 
     ws.onclose = function close(event: {}) {
@@ -313,7 +323,7 @@ export async function ingestBlocks(): Promise<void> {
     ws.onmessage = async function incoming(event: { data: string }) {
         const response: BlockResponse = JSON.parse(event.data.toString());
         
-        if (response.Desc == 'SUCCESS') {
+        if (response.Desc === 'SUCCESS') {
             const block = response.Result;
             working = block.Header.Height;
 
@@ -321,12 +331,12 @@ export async function ingestBlocks(): Promise<void> {
             await ingestBlock(block);
 
             last = working;
-            ws.send(builder.getBlockJson(working + 1));
+            ws.send(WebsocketBuilder.getBlockJson(working + 1));
 
         } else if (response.Desc === 'UNKNOWN BLOCK') {
             console.log('No new block, waiting 3 seconds.');
             await sleep(3000);
-            ws.send(builder.getBlockJson(last + 1));
+            ws.send(WebsocketBuilder.getBlockJson(last + 1));
 
         } else {
             console.log('Received error:', response);
@@ -335,5 +345,5 @@ export async function ingestBlocks(): Promise<void> {
 
     ws.onerror = function (event) {
         console.log(event);
-    }
+    };
 }
