@@ -97,7 +97,13 @@ const OntIdView: React.SFC<Props> = (props) => (
                         >
                             Request email claim
                         </Button>
-
+                        <Button 
+                            as={Link} 
+                            to={`/ont-ids/${props.ontId.Id}/request-qes-claim`} 
+                            size="large"
+                        >
+                            Request QES claim
+                        </Button>
                     </>
                 ) : null}
                 <OntIdDdoClaims claims={props.ddo.Claims}/>
